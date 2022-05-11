@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon_32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon_16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="XML：概念：Extensible Markup Language 可扩展标记语言    * 可扩展：标签都是自定义的。 &lt;user&gt;  &lt;student&gt;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="XML与Tomcat">
+<meta property="og:url" content="http://example.com/2021/08/12/XML%E4%B8%8ETomcat/index.html">
+<meta property="og:site_name" content="TheSeasonSun">
+<meta property="og:description" content="XML：概念：Extensible Markup Language 可扩展标记语言    * 可扩展：标签都是自定义的。 &lt;user&gt;  &lt;student&gt;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-08-12T14:27:31.000Z">
+<meta property="article:modified_time" content="2021-08-12T14:32:04.000Z">
+<meta property="article:author" content="TheSeasonSun">
+<meta property="article:tag" content="JavaWeb相关">
+<meta property="article:tag" content="XML">
+<meta property="article:tag" content="Tomcat">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2021/08/12/XML%E4%B8%8ETomcat/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>XML与Tomcat | TheSeasonSun</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="TheSeasonSun" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">TheSeasonSun</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/12/XML%E4%B8%8ETomcat/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar1.png">
+      <meta itemprop="name" content="TheSeasonSun">
+      <meta itemprop="description" content="We have season in the sun.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TheSeasonSun">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          XML与Tomcat
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-08-12 22:27:31 / 修改时间：22:32:04" itemprop="dateCreated datePublished" datetime="2021-08-12T22:27:31+08:00">2021-08-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaWeb%E7%9B%B8%E5%85%B3/" itemprop="url" rel="index"><span itemprop="name">JavaWeb相关</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="XML："><a href="#XML：" class="headerlink" title="XML："></a>XML：</h1><h2 id="概念：Extensible-Markup-Language-可扩展标记语言"><a href="#概念：Extensible-Markup-Language-可扩展标记语言" class="headerlink" title="概念：Extensible Markup Language 可扩展标记语言"></a>概念：Extensible Markup Language 可扩展标记语言</h2><pre><code>    * 可扩展：标签都是自定义的。 &lt;user&gt;  &lt;student&gt;
+</code></pre>
+<span id="more"></span>
+<pre><code>    * 功能
+        * 存储数据
+            1. 配置文件
+            2. 在网络中传输
+    * xml与html的区别
+        1. xml标签都是自定义的，html标签是预定义。
+        2. xml的语法严格，html语法松散
+        3. xml是存储数据的，html是展示数据
+
+    * w3c:万维网联盟
+</code></pre>
+<h2 id="语法："><a href="#语法：" class="headerlink" title="语法："></a>语法：</h2><pre><code>    * 基本语法：
+        1. xml文档的后缀名 .xml
+        2. xml第一行必须定义为文档声明
+        3. xml文档中有且仅有一个根标签
+        4. 属性值必须使用引号(单双都可)引起来
+        5. 标签必须正确关闭
+        6. xml标签名称区分大小写
+    * 快速入门：
+        &lt;?xml version=&#39;1.0&#39; ?&gt;
+        &lt;users&gt;
+            &lt;user id=&#39;1&#39;&gt;
+                &lt;name&gt;zhangsan&lt;/name&gt;
+                &lt;age&gt;23&lt;/age&gt;
+                &lt;gender&gt;male&lt;/gender&gt;
+                &lt;br/&gt;
+            &lt;/user&gt;
+            
+            &lt;user id=&#39;2&#39;&gt;
+                &lt;name&gt;lisi&lt;/name&gt;
+                &lt;age&gt;24&lt;/age&gt;
+                &lt;gender&gt;female&lt;/gender&gt;
+            &lt;/user&gt;
+        &lt;/users&gt;
+        
+    * 组成部分：
+        1. 文档声明
+            1. 格式：&lt;?xml 属性列表 ?&gt;
+            2. 属性列表：
+                * version：版本号，必须的属性
+                * encoding：编码方式。告知解析引擎当前文档使用的字符集，默认值：ISO-8859-1
+                * standalone：是否独立
+                    * 取值：
+                        * yes：不依赖其他文件
+                        * no：依赖其他文件
+        2. 指令(了解)：结合css的
+            * &lt;?xml-stylesheet type=&quot;text/css&quot; href=&quot;a.css&quot; ?&gt;
+        3. 标签：标签名称自定义的
+            * 规则：
+                * 名称可以包含字母、数字以及其他的字符 
+                * 名称不能以数字或者标点符号开始 
+                * 名称不能以字母 xml（或者 XML、Xml 等等）开始 
+                * 名称不能包含空格 
+
+        4. 属性：
+            id属性值唯一
+        5. 文本：
+            * CDATA区：在该区域中的数据会被原样展示
+                * 格式：  &lt;![CDATA[ 数据 ]]&gt;
+
+
+    * 约束：规定xml文档的书写规则
+        * 作为框架的使用者(程序员)：
+            1. 能够在xml中引入约束文档
+            2. 能够简单的读懂约束文档
+        
+        * 分类：
+            1. DTD:一种简单的约束技术
+            2. Schema:一种复杂的约束技术
+
+
+        * DTD：
+            * 引入dtd文档到xml文档中
+                * 内部dtd：将约束规则定义在xml文档中
+                * 外部dtd：将约束的规则定义在外部的dtd文件中
+                    * 本地：&lt;!DOCTYPE 根标签名 SYSTEM &quot;dtd文件的位置&quot;&gt;
+                    * 网络：&lt;!DOCTYPE 根标签名 PUBLIC &quot;dtd文件名字&quot; &quot;dtd文件的位置URL&quot;&gt;
+
+
+        * Schema:
+            * 引入：
+                1.填写xml文档的根元素
+                2.引入xsi前缀.  xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+                3.引入xsd文件命名空间.  xsi:schemaLocation=&quot;http://www.itcast.cn/xml  student.xsd&quot;
+                4.为每一个xsd约束声明一个前缀,作为标识  xmlns=&quot;http://www.itcast.cn/xml&quot; 
+
+            &lt;students   xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+                xmlns=&quot;http://www.itcast.cn/xml&quot;
+                xsi:schemaLocation=&quot;http://www.itcast.cn/xml  student.xsd&quot;&gt;
+</code></pre>
+<h2 id="解析：操作xml文档，将文档中的数据读取到内存中"><a href="#解析：操作xml文档，将文档中的数据读取到内存中" class="headerlink" title="解析：操作xml文档，将文档中的数据读取到内存中"></a>解析：操作xml文档，将文档中的数据读取到内存中</h2><pre><code>    * 操作xml文档
+        1. 解析(读取)：将文档中的数据读取到内存中
+        2. 写入：将内存中的数据保存到xml文档中。持久化的存储
+
+    * 解析xml的方式：
+        1. DOM：将标记语言文档一次性加载进内存，在内存中形成一颗dom树
+            * 优点：操作方便，可以对文档进行CRUD的所有操作
+            * 缺点：占内存
+        2. SAX：逐行读取，基于事件驱动的。
+            * 优点：不占内存。
+            * 缺点：只能读取，不能增删改
+
+
+    
+    * xml常见的解析器：
+        1. JAXP：sun公司提供的解析器，支持dom和sax两种思想
+        2. DOM4J：一款非常优秀的解析器
+        3. Jsoup：jsoup 是一款Java 的HTML解析器，可直接解析某个URL地址、HTML文本内容。它提供了一套非常省力的API，可通过DOM，CSS以及类似于jQuery的操作方法来取出和操作数据。
+        4. PULL：Android操作系统内置的解析器，sax方式的。
+
+
+    * Jsoup：jsoup 是一款Java 的HTML解析器，可直接解析某个URL地址、HTML文本内容。它提供了一套非常省力的API，可通过DOM，CSS以及类似于jQuery的操作方法来取出和操作数据。
+        * 快速入门：
+            * 步骤：
+                1. 导入jar包
+                2. 获取Document对象
+                3. 获取对应的标签Element对象
+                4. 获取数据
+
+        * 代码：
+             //2.1获取student.xml的path
+            String path = JsoupDemo1.class.getClassLoader().getResource(&quot;student.xml&quot;).getPath();
+            //2.2解析xml文档，加载文档进内存，获取dom树---&gt;Document
+            Document document = Jsoup.parse(new File(path), &quot;utf-8&quot;);
+            //3.获取元素对象 Element
+            Elements elements = document.getElementsByTag(&quot;name&quot;);
+    
+            System.out.println(elements.size());
+            //3.1获取第一个name的Element对象
+            Element element = elements.get(0);
+            //3.2获取数据
+            String name = element.text();
+            System.out.println(name);
+
+    * 对象的使用：
+        1. Jsoup：工具类，可以解析html或xml文档，返回Document
+            * parse：解析html或xml文档，返回Document
+                * parse​(File in, String charsetName)：解析xml或html文件的。
+                * parse​(String html)：解析xml或html字符串
+                * parse​(URL url, int timeoutMillis)：通过网络路径获取指定的html或xml的文档对象
+        2. Document：文档对象。代表内存中的dom树
+            * 获取Element对象
+                * getElementById​(String id)：根据id属性值获取唯一的element对象
+                * getElementsByTag​(String tagName)：根据标签名称获取元素对象集合
+                * getElementsByAttribute​(String key)：根据属性名称获取元素对象集合
+                * getElementsByAttributeValue​(String key, String value)：根据对应的属性名和属性值获取元素对象集合
+        3. Elements：元素Element对象的集合。可以当做 ArrayList&lt;Element&gt;来使用
+        4. Element：元素对象
+            1. 获取子元素对象
+                * getElementById​(String id)：根据id属性值获取唯一的element对象
+                * getElementsByTag​(String tagName)：根据标签名称获取元素对象集合
+                * getElementsByAttribute​(String key)：根据属性名称获取元素对象集合
+                * getElementsByAttributeValue​(String key, String value)：根据对应的属性名和属性值获取元素对象集合
+
+            2. 获取属性值
+                * String attr(String key)：根据属性名称获取属性值
+            3. 获取文本内容
+                * String text():获取文本内容
+                * String html():获取标签体的所有内容(包括字标签的字符串内容)
+        5. Node：节点对象
+            * 是Document和Element的父类
+
+        
+    * 快捷查询方式：
+        1. selector:选择器
+            * 使用的方法：Elements    select​(String cssQuery)
+                * 语法：参考Selector类中定义的语法
+        2. XPath：XPath即为XML路径语言，它是一种用来确定XML（标准通用标记语言的子集）文档中某部分位置的语言
+            * 使用Jsoup的Xpath需要额外导入jar包。
+            * 查询w3cshool参考手册，使用xpath的语法完成查询
+
+            * 代码：
+                //1.获取student.xml的path
+                String path = JsoupDemo6.class.getClassLoader().getResource(&quot;student.xml&quot;).getPath();
+                //2.获取Document对象
+                Document document = Jsoup.parse(new File(path), &quot;utf-8&quot;);
+        
+                //3.根据document对象，创建JXDocument对象
+                JXDocument jxDocument = new JXDocument(document);
+        
+                //4.结合xpath语法查询
+                //4.1查询所有student标签
+                List&lt;JXNode&gt; jxNodes = jxDocument.selN(&quot;//student&quot;);
+                for (JXNode jxNode : jxNodes) &#123;
+                    System.out.println(jxNode);
+                &#125;
+        
+                System.out.println(&quot;--------------------&quot;);
+        
+                //4.2查询所有student标签下的name标签
+                List&lt;JXNode&gt; jxNodes2 = jxDocument.selN(&quot;//student/name&quot;);
+                for (JXNode jxNode : jxNodes2) &#123;
+                    System.out.println(jxNode);
+                &#125;
+        
+                System.out.println(&quot;--------------------&quot;);
+        
+                //4.3查询student标签下带有id属性的name标签
+                List&lt;JXNode&gt; jxNodes3 = jxDocument.selN(&quot;//student/name[@id]&quot;);
+                for (JXNode jxNode : jxNodes3) &#123;
+                    System.out.println(jxNode);
+                &#125;
+                System.out.println(&quot;--------------------&quot;);
+                //4.4查询student标签下带有id属性的name标签 并且id属性值为itcast
+        
+                List&lt;JXNode&gt; jxNodes4 = jxDocument.selN(&quot;//student/name[@id=&#39;itcast&#39;]&quot;);
+                for (JXNode jxNode : jxNodes4) &#123;
+                    System.out.println(jxNode);
+                &#125;
+</code></pre>
+<h1 id="Tomcat"><a href="#Tomcat" class="headerlink" title="Tomcat"></a>Tomcat</h1><h2 id="web相关概念回顾"><a href="#web相关概念回顾" class="headerlink" title="web相关概念回顾"></a>web相关概念回顾</h2><pre><code>1. 软件架构
+    1. C/S：客户端/服务器端
+    2. B/S：浏览器/服务器端
+
+2. 资源分类
+    1. 静态资源：所有用户访问后，得到的结果都是一样的，称为静态资源.静态资源可以直接被浏览器解析
+        * 如： html,css,JavaScript
+    2. 动态资源:每个用户访问相同资源后，得到的结果可能不一样。称为动态资源。动态资源被访问后，需要先转换为静态资源，在返回给浏览器
+        * 如：servlet/jsp,php,asp....
+        
+
+3. 网络通信三要素
+    1. IP：电子设备(计算机)在网络中的唯一标识。
+    2. 端口：应用程序在计算机中的唯一标识。 0~65536
+    3. 传输协议：规定了数据传输的规则
+        1. 基础协议：
+            1. tcp:安全协议，三次握手。 速度稍慢
+            2. udp：不安全协议。 速度快
+</code></pre>
+<h2 id="web服务器软件："><a href="#web服务器软件：" class="headerlink" title="web服务器软件："></a>web服务器软件：</h2><pre><code>* 服务器：安装了服务器软件的计算机
+* 服务器软件：接收用户的请求，处理请求，做出响应
+* web服务器软件：接收用户的请求，处理请求，做出响应。
+    * 在web服务器软件中，可以部署web项目，让用户通过浏览器来访问这些项目
+
+
+* 常见的java相关的web服务器软件：
+    * webLogic：oracle公司，大型的JavaEE服务器，支持所有的JavaEE规范，收费的。
+    * webSphere：IBM公司，大型的JavaEE服务器，支持所有的JavaEE规范，收费的。
+    * JBOSS：JBOSS公司的，大型的JavaEE服务器，支持所有的JavaEE规范，收费的。
+    * Tomcat：Apache基金组织，中小型的JavaEE服务器，仅仅支持少量的JavaEE规范servlet/jsp。开源的，免费的。
+
+
+* JavaEE：Java语言在企业级开发中使用的技术规范的总和，一共规定了13项大的规范
+
+* Tomcat：web服务器软件
+    1. 下载：http://tomcat.apache.org/
+    2. 安装：解压压缩包即可。
+        * 注意：安装目录建议不要有中文和空格
+    3. 卸载：删除目录就行了
+    4. 启动：
+        * bin/startup.bat ,双击运行该文件即可
+        * 访问：浏览器输入：http://localhost:8080 回车访问自己
+                          http://别人的ip:8080 访问别人
+        
+        * 可能遇到的问题：
+            1. 黑窗口一闪而过：
+                * 原因： 没有正确配置JAVA_HOME环境变量
+                * 解决方案：正确配置JAVA_HOME环境变量
+
+            2. 启动报错：
+                1. 暴力：找到占用的端口号，并且找到对应的进程，杀死该进程
+                    * netstat -ano
+                2. 温柔：修改自身的端口号
+                    * conf/server.xml
+                    * &lt;Connector port=&quot;8888&quot; protocol=&quot;HTTP/1.1&quot;
+                       connectionTimeout=&quot;20000&quot;
+                       redirectPort=&quot;8445&quot; /&gt;
+                    * 一般会将tomcat的默认端口号修改为80。80端口号是http协议的默认端口号。
+                        * 好处：在访问时，就不用输入端口号
+    5. 关闭：
+        1. 正常关闭：
+            * bin/shutdown.bat
+            * ctrl+c
+        2. 强制关闭：
+            * 点击启动窗口的×
+    6. 配置:
+        * 部署项目的方式：
+            1. 直接将项目放到webapps目录下即可。
+                * /hello：项目的访问路径--&gt;虚拟目录
+                * 简化部署：将项目打成一个war包，再将war包放置到webapps目录下。
+                    * war包会自动解压缩
+
+            2. 配置conf/server.xml文件
+                在&lt;Host&gt;标签体中配置
+                &lt;Context docBase=&quot;D:\hello&quot; path=&quot;/hehe&quot; /&gt;
+                * docBase:项目存放的路径
+                * path：虚拟目录
+
+            3. 在conf\Catalina\localhost创建任意名称的xml文件。在文件中编写
+                &lt;Context docBase=&quot;D:\hello&quot; /&gt;
+                * 虚拟目录：xml文件的名称
+        
+        * 静态项目和动态项目：
+            * 目录结构
+                * java动态项目的目录结构：
+                    -- 项目的根目录
+                        -- WEB-INF目录：
+                            -- web.xml：web项目的核心配置文件
+                            -- classes目录：放置字节码文件的目录
+                            -- lib目录：放置依赖的jar包
+
+
+        * 将Tomcat集成到IDEA中，并且创建JavaEE的项目，部署项目。
+</code></pre>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/JavaWeb%E7%9B%B8%E5%85%B3/" rel="tag"># JavaWeb相关</a>
+              <a href="/tags/XML/" rel="tag"># XML</a>
+              <a href="/tags/Tomcat/" rel="tag"># Tomcat</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/08/06/HTML%E4%B8%8ECSS/" rel="prev" title="HTML与CSS">
+      <i class="fa fa-chevron-left"></i> HTML与CSS
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/08/14/Servlet/" rel="next" title="Servlet">
+      Servlet <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#XML%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">XML：</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%EF%BC%9AExtensible-Markup-Language-%E5%8F%AF%E6%89%A9%E5%B1%95%E6%A0%87%E8%AE%B0%E8%AF%AD%E8%A8%80"><span class="nav-number">1.1.</span> <span class="nav-text">概念：Extensible Markup Language 可扩展标记语言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95%EF%BC%9A"><span class="nav-number">1.2.</span> <span class="nav-text">语法：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90%EF%BC%9A%E6%93%8D%E4%BD%9Cxml%E6%96%87%E6%A1%A3%EF%BC%8C%E5%B0%86%E6%96%87%E6%A1%A3%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E8%AF%BB%E5%8F%96%E5%88%B0%E5%86%85%E5%AD%98%E4%B8%AD"><span class="nav-number">1.3.</span> <span class="nav-text">解析：操作xml文档，将文档中的数据读取到内存中</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Tomcat"><span class="nav-number">2.</span> <span class="nav-text">Tomcat</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#web%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5%E5%9B%9E%E9%A1%BE"><span class="nav-number">2.1.</span> <span class="nav-text">web相关概念回顾</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#web%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BD%AF%E4%BB%B6%EF%BC%9A"><span class="nav-number">2.2.</span> <span class="nav-text">web服务器软件：</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TheSeasonSun"
+      src="/images/avatar1.png">
+  <p class="site-author-name" itemprop="name">TheSeasonSun</p>
+  <div class="site-description" itemprop="description">We have season in the sun.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TheSeasonSun</span>
+</div>
+
+<!--  底部，强力驱动
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+-->
+
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

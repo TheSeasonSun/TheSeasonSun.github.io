@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon_32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon_16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Servlet：  server applet概念：运行在服务器端的小程序    * Servlet就是一个接口，定义了Java类被浏览器访问到(tomcat识别)的规则。     * 将来我们自定义一个类，实现Servlet接口，复写方法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Servlet">
+<meta property="og:url" content="http://example.com/2021/08/14/Servlet/index.html">
+<meta property="og:site_name" content="TheSeasonSun">
+<meta property="og:description" content="Servlet：  server applet概念：运行在服务器端的小程序    * Servlet就是一个接口，定义了Java类被浏览器访问到(tomcat识别)的规则。     * 将来我们自定义一个类，实现Servlet接口，复写方法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-08-14T13:13:22.000Z">
+<meta property="article:modified_time" content="2021-08-16T08:16:06.000Z">
+<meta property="article:author" content="TheSeasonSun">
+<meta property="article:tag" content="JavaWeb相关">
+<meta property="article:tag" content="Servlet">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2021/08/14/Servlet/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Servlet | TheSeasonSun</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="TheSeasonSun" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">TheSeasonSun</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/14/Servlet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar1.png">
+      <meta itemprop="name" content="TheSeasonSun">
+      <meta itemprop="description" content="We have season in the sun.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TheSeasonSun">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Servlet
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-08-14 21:13:22" itemprop="dateCreated datePublished" datetime="2021-08-14T21:13:22+08:00">2021-08-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-08-16 16:16:06" itemprop="dateModified" datetime="2021-08-16T16:16:06+08:00">2021-08-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaWeb%E7%9B%B8%E5%85%B3/" itemprop="url" rel="index"><span itemprop="name">JavaWeb相关</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Servlet：-server-applet"><a href="#Servlet：-server-applet" class="headerlink" title="Servlet：  server applet"></a>Servlet：  server applet</h1><h2 id="概念：运行在服务器端的小程序"><a href="#概念：运行在服务器端的小程序" class="headerlink" title="概念：运行在服务器端的小程序"></a>概念：运行在服务器端的小程序</h2><pre><code>    * Servlet就是一个接口，定义了Java类被浏览器访问到(tomcat识别)的规则。
+    * 将来我们自定义一个类，实现Servlet接口，复写方法。
+</code></pre>
+<span id="more"></span>
+
+<h2 id="快速入门："><a href="#快速入门：" class="headerlink" title="快速入门："></a>快速入门：</h2><pre><code>    1. 创建JavaEE项目
+    2. 定义一个类，实现Servlet接口
+        * public class ServletDemo1 implements Servlet
+    3. 实现接口中的抽象方法
+    4. 配置Servlet
+         在web.xml中配置：
+        &lt;!--配置Servlet --&gt;
+        &lt;servlet&gt;
+            &lt;servlet-name&gt;demo1&lt;/servlet-name&gt;
+            &lt;servlet-class&gt;cn.itcast.web.servlet.ServletDemo1&lt;/servlet-class&gt;
+        &lt;/servlet&gt;
+    
+        &lt;servlet-mapping&gt;
+            &lt;servlet-name&gt;demo1&lt;/servlet-name&gt;
+            &lt;url-pattern&gt;/demo1&lt;/url-pattern&gt;
+        &lt;/servlet-mapping&gt;
+</code></pre>
+<h2 id="执行原理："><a href="#执行原理：" class="headerlink" title="执行原理："></a>执行原理：</h2><pre><code>    1. 当服务器接受到客户端浏览器的请求后，会解析请求URL路径，获取访问的Servlet的资源路径
+    2. 查找web.xml文件，是否有对应的&lt;url-pattern&gt;标签体内容。
+    3. 如果有，则在找到对应的&lt;servlet-class&gt;全类名
+    4. tomcat会将字节码文件加载进内存，并且创建其对象
+    5. 调用其方法
+</code></pre>
+<h2 id="Servlet中的生命周期方法："><a href="#Servlet中的生命周期方法：" class="headerlink" title="Servlet中的生命周期方法："></a>Servlet中的生命周期方法：</h2><pre><code>    1. 被创建：执行init方法，只执行一次
+        * Servlet什么时候被创建？
+            * 默认情况下，第一次被访问时，Servlet被创建
+            * 可以配置执行Servlet的创建时机。
+                * 在&lt;servlet&gt;标签下配置
+                    1. 第一次被访问时，创建
+                        * &lt;load-on-startup&gt;的值为负数
+                    2. 在服务器启动时，创建
+                        * &lt;load-on-startup&gt;的值为0或正整数
+
+
+        * Servlet的init方法，只执行一次，说明一个Servlet在内存中只存在一个对象，Servlet是单例的
+            * 多个用户同时访问时，可能存在线程安全问题。
+            * 解决：尽量不要在Servlet中定义成员变量。即使定义了成员变量，也不要对修改值
+
+    2. 提供服务：执行service方法，执行多次
+        * 每次访问Servlet时，Service方法都会被调用一次。
+    3. 被销毁：执行destroy方法，只执行一次
+        * Servlet被销毁时执行。服务器关闭时，Servlet被销毁
+        * 只有服务器正常关闭时，才会执行destroy方法。
+        * destroy方法在Servlet被销毁之前执行，一般用于释放资源
+</code></pre>
+<h2 id="Servlet3-0："><a href="#Servlet3-0：" class="headerlink" title="Servlet3.0："></a>Servlet3.0：</h2><pre><code>    * 好处：
+        * 支持注解配置。可以不需要web.xml了。
+
+    * 步骤：
+        1. 创建JavaEE项目，选择Servlet的版本3.0以上，可以不创建web.xml
+        2. 定义一个类，实现Servlet接口
+        3. 复写方法
+        4. 在类上使用@WebServlet注解，进行配置
+            * @WebServlet(&quot;资源路径&quot;)
+
+
+            @Target(&#123;ElementType.TYPE&#125;)
+            @Retention(RetentionPolicy.RUNTIME)
+            @Documented
+            public @interface WebServlet &#123;
+                String name() default &quot;&quot;;//相当于&lt;Servlet-name&gt;
+            
+                String[] value() default &#123;&#125;;//代表urlPatterns()属性配置
+            
+                String[] urlPatterns() default &#123;&#125;;//相当于&lt;url-pattern&gt;
+            
+                int loadOnStartup() default -1;//相当于&lt;load-on-startup&gt;
+            
+                WebInitParam[] initParams() default &#123;&#125;;
+            
+                boolean asyncSupported() default false;
+            
+                String smallIcon() default &quot;&quot;;
+            
+                String largeIcon() default &quot;&quot;;
+            
+                String description() default &quot;&quot;;
+            
+                String displayName() default &quot;&quot;;
+            &#125;
+</code></pre>
+<h2 id="IDEA与tomcat的相关配置"><a href="#IDEA与tomcat的相关配置" class="headerlink" title="IDEA与tomcat的相关配置"></a>IDEA与tomcat的相关配置</h2><pre><code>1. IDEA会为每一个tomcat部署的项目单独建立一份配置文件
+    * 查看控制台的log：Using CATALINA_BASE:   &quot;C:\Users\fqy\.IntelliJIdea2018.1\system\tomcat\_itcast&quot;
+
+2. 工作空间项目    和     tomcat部署的web项目
+    * tomcat真正访问的是“tomcat部署的web项目”，&quot;tomcat部署的web项目&quot;对应着&quot;工作空间项目&quot; 的web目录下的所有资源
+    * WEB-INF目录下的资源不能被浏览器直接访问。
+3. 断点调试：使用&quot;小虫子&quot;启动 dubug 启动
+</code></pre>
+<h2 id="Servlet的体系结构"><a href="#Servlet的体系结构" class="headerlink" title="Servlet的体系结构"></a>Servlet的体系结构</h2><pre><code>    Servlet -- 接口
+        |
+    GenericServlet -- 抽象类
+        |
+    HttpServlet  -- 抽象类
+
+    * GenericServlet：将Servlet接口中其他的方法做了默认空实现，只将service()方法作为抽象
+        * 将来定义Servlet类时，可以继承GenericServlet，实现service()方法即可
+
+    * HttpServlet：对http协议的一种封装，简化操作
+        1. 定义类继承HttpServlet
+        2. 复写doGet/doPost方法
+</code></pre>
+<h2 id="Servlet相关配置"><a href="#Servlet相关配置" class="headerlink" title="Servlet相关配置"></a>Servlet相关配置</h2><pre><code>    1. urlpartten:Servlet访问路径
+        1. 一个Servlet可以定义多个访问路径 ： @WebServlet(&#123;&quot;/d4&quot;,&quot;/dd4&quot;,&quot;/ddd4&quot;&#125;)
+        2. 路径定义规则：
+            1. /xxx：路径匹配
+            2. /xxx/xxx:多层路径，目录结构
+            3. *.do：扩展名匹配
+</code></pre>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/JavaWeb%E7%9B%B8%E5%85%B3/" rel="tag"># JavaWeb相关</a>
+              <a href="/tags/Servlet/" rel="tag"># Servlet</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/08/12/XML%E4%B8%8ETomcat/" rel="prev" title="XML与Tomcat">
+      <i class="fa fa-chevron-left"></i> XML与Tomcat
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/08/16/%E5%85%B3%E4%BA%8E%E5%A6%82%E4%BD%95%E8%AE%A9%E5%A4%A7%E8%84%91%E4%BF%9D%E6%8C%81%E6%B8%85%E9%86%92/" rel="next" title="关于如何让大脑保持清醒">
+      关于如何让大脑保持清醒 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Servlet%EF%BC%9A-server-applet"><span class="nav-number">1.</span> <span class="nav-text">Servlet：  server applet</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%EF%BC%9A%E8%BF%90%E8%A1%8C%E5%9C%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF%E7%9A%84%E5%B0%8F%E7%A8%8B%E5%BA%8F"><span class="nav-number">1.1.</span> <span class="nav-text">概念：运行在服务器端的小程序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8%EF%BC%9A"><span class="nav-number">1.2.</span> <span class="nav-text">快速入门：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E5%8E%9F%E7%90%86%EF%BC%9A"><span class="nav-number">1.3.</span> <span class="nav-text">执行原理：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Servlet%E4%B8%AD%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%96%B9%E6%B3%95%EF%BC%9A"><span class="nav-number">1.4.</span> <span class="nav-text">Servlet中的生命周期方法：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Servlet3-0%EF%BC%9A"><span class="nav-number">1.5.</span> <span class="nav-text">Servlet3.0：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IDEA%E4%B8%8Etomcat%E7%9A%84%E7%9B%B8%E5%85%B3%E9%85%8D%E7%BD%AE"><span class="nav-number">1.6.</span> <span class="nav-text">IDEA与tomcat的相关配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Servlet%E7%9A%84%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84"><span class="nav-number">1.7.</span> <span class="nav-text">Servlet的体系结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Servlet%E7%9B%B8%E5%85%B3%E9%85%8D%E7%BD%AE"><span class="nav-number">1.8.</span> <span class="nav-text">Servlet相关配置</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TheSeasonSun"
+      src="/images/avatar1.png">
+  <p class="site-author-name" itemprop="name">TheSeasonSun</p>
+  <div class="site-description" itemprop="description">We have season in the sun.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TheSeasonSun</span>
+</div>
+
+<!--  底部，强力驱动
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+-->
+
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

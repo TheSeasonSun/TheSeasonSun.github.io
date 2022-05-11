@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon_32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon_16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="回溯算法模板123456789101112void backtracking(参数) &amp;#123;    if (终止条件) &amp;#123;        存放结果;        return;    &amp;#125;    for (选择：本层集合中元素（树中节点孩子的数量就是集合的大小）) &amp;#123;        处理节点;        backtracking(路径，选择列表); &#x2F;&#x2F; 递">
+<meta property="og:type" content="article">
+<meta property="og:title" content="回溯算法">
+<meta property="og:url" content="http://example.com/2021/09/15/%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/index.html">
+<meta property="og:site_name" content="TheSeasonSun">
+<meta property="og:description" content="回溯算法模板123456789101112void backtracking(参数) &amp;#123;    if (终止条件) &amp;#123;        存放结果;        return;    &amp;#125;    for (选择：本层集合中元素（树中节点孩子的数量就是集合的大小）) &amp;#123;        处理节点;        backtracking(路径，选择列表); &#x2F;&#x2F; 递">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-09-15T01:19:49.000Z">
+<meta property="article:modified_time" content="2021-09-29T11:56:04.000Z">
+<meta property="article:author" content="TheSeasonSun">
+<meta property="article:tag" content="数据结构与算法">
+<meta property="article:tag" content="代码">
+<meta property="article:tag" content="回溯算法">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2021/09/15/%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>回溯算法 | TheSeasonSun</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="TheSeasonSun" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">TheSeasonSun</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/15/%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar1.png">
+      <meta itemprop="name" content="TheSeasonSun">
+      <meta itemprop="description" content="We have season in the sun.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TheSeasonSun">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          回溯算法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-09-15 09:19:49" itemprop="dateCreated datePublished" datetime="2021-09-15T09:19:49+08:00">2021-09-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-09-29 19:56:04" itemprop="dateModified" datetime="2021-09-29T19:56:04+08:00">2021-09-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="回溯算法模板"><a href="#回溯算法模板" class="headerlink" title="回溯算法模板"></a>回溯算法模板</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">void backtracking(参数) &#123;</span><br><span class="line">    if (终止条件) &#123;</span><br><span class="line">        存放结果;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    for (选择：本层集合中元素（树中节点孩子的数量就是集合的大小）) &#123;</span><br><span class="line">        处理节点;</span><br><span class="line">        backtracking(路径，选择列表); // 递归</span><br><span class="line">        回溯，撤销处理结果</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+<p>代码绝大多数来自于 <em>代码随想录</em>，只为个人学习与总结</p>
+<h2 id="组合"><a href="#组合" class="headerlink" title="组合"></a>组合</h2><p>每次从集合中选取元素，可选择的范围随着选择的进行而收缩，调整可选择的范围，就是要靠split.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">//LC77</span><br><span class="line">class Solution &#123;</span><br><span class="line">    List&lt;List&lt;Integer&gt;&gt; res=new ArrayList&lt;&gt;();</span><br><span class="line">    List&lt;Integer&gt; path=new ArrayList&lt;&gt;();</span><br><span class="line">    public List&lt;List&lt;Integer&gt;&gt; combine(int n, int k) &#123;</span><br><span class="line">        dfs(n,k,1);</span><br><span class="line">        return res;</span><br><span class="line">    &#125;</span><br><span class="line">    public void dfs(int n,int k,int split)&#123;</span><br><span class="line">        //终止条件</span><br><span class="line">        if(path.size()==k)&#123;</span><br><span class="line">            res.add(new ArrayList&lt;&gt;(path));</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">        //n - (k - path.size()) + 1是剪枝条件,原本是写成i&lt;=n。</span><br><span class="line">        //还需要的元素个数为: k - path.size();</span><br><span class="line">        //在集合n中至多要从该起始位置 : n - (k - path.size()) + 1，开始遍历</span><br><span class="line">        //为什么有个+1呢，因为包括起始位置，我们要是一个左闭的集合。</span><br><span class="line">        for(int i=split;i&lt;=n - (k - path.size()) + 1;i++)&#123;</span><br><span class="line">            path.add(i);</span><br><span class="line">            dfs(n,k,i+1);</span><br><span class="line">            path.remove(path.size()-1);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="组合总和III"><a href="#组合总和III" class="headerlink" title="组合总和III"></a>组合总和III</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">//LC216</span><br><span class="line">class Solution &#123;</span><br><span class="line">    List&lt;List&lt;Integer&gt;&gt; res=new ArrayList&lt;&gt;();</span><br><span class="line">    List&lt;Integer&gt; path=new ArrayList&lt;&gt;();</span><br><span class="line">    public List&lt;List&lt;Integer&gt;&gt; combinationSum3(int k, int n) &#123;</span><br><span class="line">        dfs(k,n,1);</span><br><span class="line">        return res;</span><br><span class="line">    &#125;</span><br><span class="line">    //可以去掉sum，用n-i，最后n==0存储</span><br><span class="line">    public void dfs(int k,int n,int split)&#123;</span><br><span class="line">        //剪枝</span><br><span class="line">        if(n&lt;0)&#123;</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">        if(path.size()==k)&#123;</span><br><span class="line">            if(n==0)&#123;res.add(new ArrayList&lt;&gt;(path));&#125;</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">        //剪枝，9-(k-path.size())+1</span><br><span class="line">        for(int i=split;i&lt;=9-(k-path.size())+1;i++)&#123;</span><br><span class="line">            n-=i;</span><br><span class="line">            path.add(i);</span><br><span class="line">            dfs(k,n,i+1);</span><br><span class="line">            //回溯</span><br><span class="line">            path.remove(path.size()-1);</span><br><span class="line">            n+=i;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="电话号码的字母组合"><a href="#电话号码的字母组合" class="headerlink" title="电话号码的字母组合"></a>电话号码的字母组合</h2><p>这道题的难点如下：<br>1.数字和字母如何映射<br>    这里可以用数组下边与字母一一对应来映射。<br>    String[] numString={“”,””,”abc”,”def”,”ghi”,”jkl”,”mno”,”pqrs”,”tuv”,”wxyz”};</p>
+<p>2.两个字母就两个for循环，三个字符我就三个for循环，以此类推，然后发现代码根本写不出来，所以我们要用回溯算法。</p>
+<p>3.输入1 * #按键等等异常情况</p>
+<ul>
+<li><p>就是用str.charAt(i)的码值减去‘0’的码值，得到的值干好就是s中第i个字符的十进制值。</p>
+</li>
+<li><p>StringBuffer<br>  StringBuffer对象则代表一个字符序列可变的字符串，当一个StringBuffer被创建以后，通过StringBuffer提供的append()、insert()、reverse()、setCharAt()、setLength()等方法可以改变这个字符串对象的字符序列。一旦通过StringBuffer生成了最终想要的字符串，就可以调用它的toString()方法将其转换为一个String对象。</p>
+</li>
+<li><p>StringBuilder<br>  StringBuilder类也代表可变字符串对象。实际上，StringBuilder和StringBuffer基本相似，两个类的构造器和方法也基本相同。不同的是：StringBuffer是线程安全的，而StringBuilder则没有实现线程安全功能，所以性能略高。</p>
+</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">//LC17</span><br><span class="line">class Solution &#123;</span><br><span class="line">    List&lt;String&gt; list=new ArrayList&lt;&gt;();</span><br><span class="line">    String[] numString=&#123;&quot;&quot;,&quot;&quot;,&quot;abc&quot;,&quot;def&quot;,&quot;ghi&quot;,&quot;jkl&quot;,&quot;mno&quot;,&quot;pqrs&quot;,&quot;tuv&quot;,&quot;wxyz&quot;&#125;;</span><br><span class="line">    public List&lt;String&gt; letterCombinations(String digits) &#123;</span><br><span class="line">        if(digits == null || digits.length() == 0) &#123;</span><br><span class="line">            return list;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        dfs(digits,0);</span><br><span class="line">        return list;</span><br><span class="line">    &#125;</span><br><span class="line">    //每次迭代获取一个字符串，所以会涉及大量的字符串拼接，所以这里选择更为高效的 StringBuild</span><br><span class="line">    StringBuilder temp=new StringBuilder();</span><br><span class="line">    public void dfs(String digits, int num) &#123;</span><br><span class="line">        if(num == digits.length())&#123;</span><br><span class="line">            list.add(temp.toString());</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        String str = numString[digits.charAt(num)-&#x27;0&#x27;];</span><br><span class="line">        for(int i = 0; i &lt; str.length(); i++)&#123;</span><br><span class="line">            temp.append(str.charAt(i));</span><br><span class="line">            dfs(digits, num + 1);</span><br><span class="line">            temp.deleteCharAt(temp.length()-1);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="组合总和"><a href="#组合总和" class="headerlink" title="组合总和"></a>组合总和</h2><p>注意这里有个剪枝条件是target - candidates[i] &gt;= 0，它意味着如果不符合此条件，这次for循环会终止，进入下一次for循环，也就是说，这次for循环里的深度遍历不会进行下去，这次for循环中candidates[i]之后的数也不会去进行了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">//LC39</span><br><span class="line">class Solution &#123;</span><br><span class="line">    List&lt;List&lt;Integer&gt;&gt; res = new ArrayList&lt;&gt;();</span><br><span class="line">    List&lt;Integer&gt; path = new ArrayList&lt;&gt;();</span><br><span class="line">    </span><br><span class="line">    public List&lt;List&lt;Integer&gt;&gt; combinationSum(int[] candidates, int target) &#123;</span><br><span class="line">        Arrays.sort(candidates); // 先进行排序</span><br><span class="line">        dfs(candidates, target, 0);</span><br><span class="line">        return res; </span><br><span class="line">    &#125;</span><br><span class="line">    public void dfs(int[] candidates, int target,int start)&#123;</span><br><span class="line">        // if(target&lt;0)&#123;</span><br><span class="line">        //     return;</span><br><span class="line">        // &#125;</span><br><span class="line">        if(target==0)&#123;</span><br><span class="line">            res.add(new ArrayList&lt;&gt;(path));</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">        for(int i = start; i &lt; candidates.length &amp;&amp; target - candidates[i] &gt;= 0; i++)&#123;</span><br><span class="line">            // if (target - candidates[i] &lt; 0) &#123;break;&#125;</span><br><span class="line">            // target -= candidates[i];</span><br><span class="line">            path.add(candidates[i]);</span><br><span class="line">            //注意对target的操作在递归的形参里。</span><br><span class="line">            dfs(candidates,target - candidates[i],i);</span><br><span class="line">            // target += candidates[i];</span><br><span class="line">            path.remove(path.size() - 1);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="组合总和II"><a href="#组合总和II" class="headerlink" title="组合总和II"></a>组合总和II</h2><p>LC40与LC39相似，但区别在于：集合（数组candidates）有重复元素，但还不能有重复的组合。用set或者map去重很容易超时。<br>所谓去重，其实就是使用过的元素不能重复选取，都知道组合问题可以抽象为树形结构，那么“使用过”在这个树形结构上是有两个维度的，一个维度是同一树枝上使用过，一个维度是同一树层上使用过。<br>回看一下题目，元素在同一个组合内是可以重复的，怎么重复都没事，但两个组合不能相同。</p>
+<p><strong>所以我们要去重的是同一树层上的“使用过”，同一树枝上的都是一个组合里的元素，不用去重。</strong><br>所以此题还需要加一个bool型数组used，用来记录同一树枝上的元素是否使用过。</p>
+<p>这个集合去重的重任就是used来完成的。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">//LC40</span><br><span class="line">class Solution &#123;</span><br><span class="line">    List&lt;List&lt;Integer&gt;&gt; res = new ArrayList&lt;&gt;();</span><br><span class="line">    Deque&lt;Integer&gt; deque = new LinkedList&lt;&gt;();</span><br><span class="line">    int sum=0;</span><br><span class="line">    public List&lt;List&lt;Integer&gt;&gt; combinationSum2(int[] candidates, int target) &#123;</span><br><span class="line">        Arrays.sort(candidates);</span><br><span class="line">        boolean[] flag = new boolean[candidates.length];</span><br><span class="line">        dfs(candidates, target, 0, flag);</span><br><span class="line">        return res;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void dfs(int[] arr, int target, int index, boolean[] flag) &#123;</span><br><span class="line">        if(sum==target)&#123;</span><br><span class="line">            res.add(new ArrayList(deque));</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">        for (int i = index; i &lt; arr.length &amp;&amp; arr[i] + sum &lt;= target; i++)&#123;</span><br><span class="line">            if(i &gt; 0 &amp;&amp; arr[i] == arr[i-1] &amp;&amp; !flag[i-1]) &#123;</span><br><span class="line">                continue;</span><br><span class="line">            &#125;</span><br><span class="line">            flag[i] = true;</span><br><span class="line">            sum += arr[i];</span><br><span class="line">            deque.push(arr[i]);</span><br><span class="line">            dfs(arr,target, i + 1, flag);</span><br><span class="line">            int temp = deque.pop();</span><br><span class="line">            flag[i] = false;</span><br><span class="line">            sum -= temp;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="分割回文字符串"><a href="#分割回文字符串" class="headerlink" title="分割回文字符串"></a>分割回文字符串</h2><p>这道题的难点是，如何分割字符串，之后在判断是否是回文字符串。判断回文字符串一个函数即可完成，如何全面的分割字符串才是难题。<br>看到题目的第一个思路可能就是用for循环再用双指针去切割，双指针的确是解决本问题的关键。<br>在前面的回溯算法中其实可以发现，回溯算法本质上还是简化循环的算法。那么本题也可以用回溯算法去实现。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">//LC131</span><br><span class="line">class Solution &#123;</span><br><span class="line">    List&lt;List&lt;String&gt;&gt; res=new ArrayList&lt;&gt;();</span><br><span class="line">    List&lt;String&gt; path=new ArrayList&lt;&gt;();</span><br><span class="line">    public List&lt;List&lt;String&gt;&gt; partition(String s) &#123;</span><br><span class="line">        dfs(s, 0);</span><br><span class="line">        return res;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    //index是分割线</span><br><span class="line">    public void dfs(String s, int index) &#123;</span><br><span class="line">        //终止条件为分割线越过最后一个字符</span><br><span class="line">        if(index &gt;= s.length()) &#123;</span><br><span class="line">            res.add(new ArrayList&lt;&gt;(path));</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        for(int i=index; i&lt;s.length(); i++) &#123;</span><br><span class="line">            if(isbool(s, index, i))&#123;</span><br><span class="line">                path.add(s.substring(index,i+1));</span><br><span class="line">            &#125;else&#123;</span><br><span class="line">                continue;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            dfs(s, i+1);</span><br><span class="line">            path.remove(path.size()-1);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public boolean isbool(String s, int left, int right) &#123;</span><br><span class="line">        for(int i=left, j=right; i&lt;=j; i++,j--) &#123;</span><br><span class="line">            if(s.charAt(i) != s.charAt(j)) &#123;</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="复原IP地址"><a href="#复原IP地址" class="headerlink" title="复原IP地址"></a>复原IP地址</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">class Solution &#123;</span><br><span class="line"></span><br><span class="line">    List&lt;String&gt; res=new ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    public List&lt;String&gt; restoreIpAddresses(String s) &#123;</span><br><span class="line"></span><br><span class="line">        if(s.length()&gt;12)&#123;return res;&#125;//剪枝</span><br><span class="line">        dfs(s,0,0);</span><br><span class="line">        return res;</span><br><span class="line">    &#125;</span><br><span class="line">    //start: 搜索的起始位置， pointNum:添加逗点的数量</span><br><span class="line">    public void dfs(String s, int start, int pointNum)&#123;</span><br><span class="line">        //终止条件 逗号数为3。要验证一下最后一组数是否符合条件</span><br><span class="line">        if(pointNum==3)&#123;</span><br><span class="line">            if(isValid(s, start, s.length()-1))&#123;</span><br><span class="line">                res.add(s);</span><br><span class="line">            &#125;</span><br><span class="line">            return;  </span><br><span class="line">        &#125;</span><br><span class="line">        for(int i=start; i&lt;s.length(); i++)&#123;</span><br><span class="line">            if(isValid(s, start, i))&#123;</span><br><span class="line">                s=s.substring(0, i+1)+&quot;.&quot;+s.substring(i+1);</span><br><span class="line">                pointNum++;</span><br><span class="line">                dfs(s, i+2,pointNum);// 插⼊逗点之后下⼀个⼦串的起始位置为i+2</span><br><span class="line">                pointNum--; </span><br><span class="line">                s= s.substring(0,i+1)+s.substring(i+2);// 回溯删掉逗点</span><br><span class="line">            &#125;else&#123;</span><br><span class="line">                continue;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    public boolean isValid(String s, int l, int r)&#123;</span><br><span class="line">        if(l&gt;r)&#123;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">        //0开头返回false</span><br><span class="line">        if(s.charAt(l)==&#x27;0&#x27; &amp;&amp; l!=r)&#123;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">        int num=0;</span><br><span class="line">        //左闭右闭</span><br><span class="line">        for(int i=l; i&lt;=r; i++)&#123;</span><br><span class="line">            if(s.charAt(i)&gt;&#x27;9&#x27; || s.charAt(i)&lt;&#x27;0&#x27;)&#123;</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line">            num=num*10+(s.charAt(i)-&#x27;0&#x27;);</span><br><span class="line">            if(num&gt;255)&#123;</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="子集"><a href="#子集" class="headerlink" title="子集"></a>子集</h2><p>把回溯算法模拟成树模型的话，组合问题就是收集树的所有叶子节点，而子集问题，就是收集树的所有节点。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">//LC78</span><br><span class="line">class Solution &#123;</span><br><span class="line">    List&lt;List&lt;Integer&gt;&gt; res=new ArrayList&lt;&gt;();</span><br><span class="line">    List&lt;Integer&gt; one=new ArrayList&lt;&gt;();</span><br><span class="line">    public List&lt;List&lt;Integer&gt;&gt; subsets(int[] nums) &#123;</span><br><span class="line">        res.add(new ArrayList&lt;&gt;());</span><br><span class="line">        dfs(nums,0);</span><br><span class="line">        return res;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void dfs(int[] nums,int start)&#123;</span><br><span class="line">        if(start&gt;=nums.length)&#123;</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">        for(int i=start; i&lt;nums.length; i++)&#123;</span><br><span class="line">            one.add(nums[i]);</span><br><span class="line">            res.add(new ArrayList&lt;&gt;(one));</span><br><span class="line">            dfs(nums,i+1);</span><br><span class="line">            one.remove(one.size()-1);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="子集II"><a href="#子集II" class="headerlink" title="子集II"></a>子集II</h2><p>难点还是去重问题。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">//LC90</span><br><span class="line">class Solution &#123;</span><br><span class="line">    List&lt;List&lt;Integer&gt;&gt; res=new ArrayList&lt;&gt;();</span><br><span class="line">    List&lt;Integer&gt; path=new ArrayList&lt;&gt;();</span><br><span class="line">    boolean[] used;</span><br><span class="line">    public List&lt;List&lt;Integer&gt;&gt; subsetsWithDup(int[] nums) &#123;</span><br><span class="line">        res.add(new ArrayList&lt;&gt;());</span><br><span class="line">        </span><br><span class="line">        used = new boolean[nums.length];</span><br><span class="line">        Arrays.sort(nums);</span><br><span class="line">        dfs(nums, 0);</span><br><span class="line">        return res;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void dfs(int[] nums, int start)&#123;</span><br><span class="line">        //终止条件</span><br><span class="line">        if(start&gt;=nums.length)&#123;</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">        for(int i=start; i&lt;nums.length; i++)&#123;</span><br><span class="line">            //如果是同一树层的则continue</span><br><span class="line">            if(i&gt;0 &amp;&amp; nums[i]==nums[i-1] &amp;&amp; !used[i-1])&#123;</span><br><span class="line">                continue;</span><br><span class="line">            &#125;</span><br><span class="line">            path.add(nums[i]);</span><br><span class="line">            res.add(new ArrayList&lt;&gt;(path));</span><br><span class="line">            used[i]=true;</span><br><span class="line">            dfs(nums, i+1);</span><br><span class="line">            used[i]=false;</span><br><span class="line">            path.remove(path.size()-1);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="递增子序列"><a href="#递增子序列" class="headerlink" title="递增子序列"></a>递增子序列</h2><p>可以看成是子集问题的变类，也同样需要去重,而本题求自增子序列，是不能对原数组经行排序的，排完序的数组都是自增子序列了。所以不能使用之前的去重逻辑！</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">//LC491</span><br><span class="line">class Solution &#123;</span><br><span class="line">    List&lt;Integer&gt; path=new ArrayList&lt;&gt;();</span><br><span class="line">    List&lt;List&lt;Integer&gt;&gt; res=new ArrayList&lt;&gt;();</span><br><span class="line">    public List&lt;List&lt;Integer&gt;&gt; findSubsequences(int[] nums) &#123;</span><br><span class="line">        dfs(nums, 0);</span><br><span class="line">        return res;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void dfs(int[] nums,int strat)&#123;</span><br><span class="line">        //这个终止条件不加也可以，不会无限递归</span><br><span class="line">        if(strat&gt;=nums.length)&#123;return;&#125;</span><br><span class="line">        int[] used=new int[201];</span><br><span class="line">        for(int i=strat; i&lt;nums.length; i++)&#123;</span><br><span class="line">            //若下一个数比path中的最后一个数小，或者同层相同（同层去重），结束本次循环</span><br><span class="line">            //used记录本层元素是否重复使用，新的一层used都会重新定义（清空），所以要知道uset只负责本层！</span><br><span class="line">            if(!path.isEmpty() &amp;&amp; nums[i]&lt;path.get(path.size()-1) || used[nums[i]+100]==1)&#123;</span><br><span class="line">                continue;</span><br><span class="line">            &#125;</span><br><span class="line">            path.add(nums[i]);</span><br><span class="line">            if(path.size()&gt;=2)&#123;</span><br><span class="line">                res.add(new ArrayList&lt;&gt;(path));</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            used[nums[i]+100] = 1;</span><br><span class="line">            dfs(nums, i+1);</span><br><span class="line">            path.remove(path.size()-1);</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="全排列"><a href="#全排列" class="headerlink" title="全排列"></a>全排列</h2><p><em>给定一个不含重复数字的数组 nums ，返回其 所有可能的全排列 。你可以 按任意顺序 返回答案。</em></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">//LC46</span><br><span class="line">class Solution &#123;</span><br><span class="line">    List&lt;List&lt;Integer&gt;&gt; res= new ArrayList&lt;&gt;();</span><br><span class="line">    List&lt;Integer&gt; path=new ArrayList&lt;&gt;();</span><br><span class="line">    boolean[] used;</span><br><span class="line">    public List&lt;List&lt;Integer&gt;&gt; permute(int[] nums) &#123;</span><br><span class="line">        boolean[] used=new boolean[nums.length];</span><br><span class="line">        dfs(nums, used);</span><br><span class="line">        return res;</span><br><span class="line">    &#125;</span><br><span class="line">    public void dfs(int[] nums, boolean[] used)&#123;</span><br><span class="line">        //终止条件,此题不加也可以</span><br><span class="line">        if(path.size()==nums.length)&#123;</span><br><span class="line">            res.add(new ArrayList&lt;&gt;(path));</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        for(int i=0; i&lt;nums.length; i++)&#123;</span><br><span class="line">            if(used[i]==true)&#123;continue;&#125;</span><br><span class="line"></span><br><span class="line">            path.add(nums[i]);</span><br><span class="line">            // if(path.size()==nums.length)&#123;</span><br><span class="line">            //     res.add(new ArrayList&lt;&gt;(path));</span><br><span class="line">            // &#125;</span><br><span class="line">            </span><br><span class="line">            used[i]=true;</span><br><span class="line">            dfs(nums, used);</span><br><span class="line">            used[i]=false;</span><br><span class="line">            path.remove(path.size()-1);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="全排列-1"><a href="#全排列-1" class="headerlink" title="全排列"></a>全排列</h2><p><em>给定一个可包含重复数字的序列 nums ，按任意顺序 返回所有不重复的全排列。</em></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">//同树层去重记得要排序</span><br><span class="line">//LC47</span><br><span class="line">class Solution &#123;</span><br><span class="line">    List&lt;Integer&gt; path=new ArrayList&lt;&gt;();</span><br><span class="line">    List&lt;List&lt;Integer&gt;&gt; res=new ArrayList&lt;&gt;();</span><br><span class="line">    public List&lt;List&lt;Integer&gt;&gt; permuteUnique(int[] nums) &#123;</span><br><span class="line">        Arrays.sort(nums);</span><br><span class="line">        boolean[] used=new boolean[nums.length];</span><br><span class="line">        dfs(nums,used);</span><br><span class="line">        return res;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void dfs(int[] nums, boolean[] used)&#123;</span><br><span class="line">        if(path.size()==nums.length)&#123;</span><br><span class="line">            res.add(new ArrayList&lt;&gt;(path));</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        for(int i=0; i&lt;nums.length; i++)&#123;</span><br><span class="line">            //同树层去重</span><br><span class="line">            if(i&gt;0 &amp;&amp; nums[i]==nums[i-1] &amp;&amp; used[i-1]==false)&#123;</span><br><span class="line">                continue;</span><br><span class="line">            &#125;</span><br><span class="line">            if(used[i]==false)&#123;</span><br><span class="line">                path.add(nums[i]);</span><br><span class="line">                used[i]=true;</span><br><span class="line">                dfs(nums,used);</span><br><span class="line">                path.remove(path.size()-1);</span><br><span class="line">                used[i]=false;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="重新安排行程"><a href="#重新安排行程" class="headerlink" title="重新安排行程"></a>重新安排行程</h2><p><a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/reconstruct-itinerary/">332.重新安排行程</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">//LC332</span><br><span class="line">class Solution &#123;</span><br><span class="line">    private Deque&lt;String&gt; res;</span><br><span class="line">    private Map&lt;String, Map&lt;String, Integer&gt;&gt; map;</span><br><span class="line"></span><br><span class="line">    private boolean backTracking(int ticketNum)&#123;</span><br><span class="line">        if(res.size() == ticketNum + 1)&#123;</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line">        String last = res.getLast();</span><br><span class="line">        if(map.containsKey(last))&#123;//防止出现null</span><br><span class="line">            for(Map.Entry&lt;String, Integer&gt; target : map.get(last).entrySet())&#123;</span><br><span class="line">                int count = target.getValue();</span><br><span class="line">                if(count &gt; 0)&#123;</span><br><span class="line">                    res.add(target.getKey());</span><br><span class="line">                    target.setValue(count - 1);</span><br><span class="line">                    if(backTracking(ticketNum)) return true;</span><br><span class="line">                    res.removeLast();</span><br><span class="line">                    target.setValue(count);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public List&lt;String&gt; findItinerary(List&lt;List&lt;String&gt;&gt; tickets) &#123;</span><br><span class="line">        map = new HashMap&lt;String, Map&lt;String, Integer&gt;&gt;();</span><br><span class="line">        res = new LinkedList&lt;&gt;();</span><br><span class="line">        for(List&lt;String&gt; t : tickets)&#123;</span><br><span class="line">            Map&lt;String, Integer&gt; temp;</span><br><span class="line">            if(map.containsKey(t.get(0)))&#123;</span><br><span class="line">                temp = map.get(t.get(0));</span><br><span class="line">                temp.put(t.get(1), temp.getOrDefault(t.get(1), 0) + 1);</span><br><span class="line">            &#125;else&#123;</span><br><span class="line">                temp = new TreeMap&lt;&gt;();//升序Map</span><br><span class="line">                temp.put(t.get(1), 1);</span><br><span class="line">            &#125;</span><br><span class="line">            map.put(t.get(0), temp);</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        res.add(&quot;JFK&quot;);</span><br><span class="line">        backTracking(tickets.size());</span><br><span class="line">        return new ArrayList&lt;&gt;(res);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="N皇后"><a href="#N皇后" class="headerlink" title="N皇后"></a>N皇后</h2><p><a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/n-queens/">51.N皇后</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">//LC51</span><br><span class="line">class Solution &#123;</span><br><span class="line">    List&lt;List&lt;String&gt;&gt; res=new ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    public List&lt;List&lt;String&gt;&gt; solveNQueens(int n) &#123;</span><br><span class="line">        char[][] arr=new char[n][n];</span><br><span class="line">        for(char[] item : arr)&#123;</span><br><span class="line">            Arrays.fill(item,&#x27;.&#x27;);</span><br><span class="line">        &#125;</span><br><span class="line">        dfs(n,0,arr);</span><br><span class="line">        return res;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    public void dfs(int n, int row, char[][] arr)&#123;</span><br><span class="line">        if(n==row)&#123;</span><br><span class="line">            res.add(Array2List(arr));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        for (int col = 0;col &lt; n; ++col) &#123;</span><br><span class="line">            if (isVaild (row, col, n, arr)) &#123;</span><br><span class="line">                arr[row][col] = &#x27;Q&#x27;;</span><br><span class="line">                dfs(n, row+1, arr);</span><br><span class="line">                arr[row][col] = &#x27;.&#x27;;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public List Array2List(char[][] chessboard) &#123;</span><br><span class="line">        List&lt;String&gt; list = new ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        for (char[] c : chessboard) &#123;</span><br><span class="line">            list.add(String.copyValueOf(c));</span><br><span class="line">        &#125;</span><br><span class="line">        return list;</span><br><span class="line">    &#125;</span><br><span class="line">    public boolean isVaild(int row, int col, int n, char[][] arr)&#123;</span><br><span class="line">        //同列</span><br><span class="line">        for(int i=0; i&lt;row; i++)&#123;</span><br><span class="line">            if(arr[i][col]==&#x27;Q&#x27;)&#123;</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        //45度</span><br><span class="line">        for(int i=row-1, j=col-1; i&gt;=0&amp;&amp;j&gt;=0; i--,j--)&#123;</span><br><span class="line">            if(arr[i][j]==&#x27;Q&#x27;)&#123;</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        //135度,右上角</span><br><span class="line">        for(int i=row-1, j=col+1; i&gt;=0 &amp;&amp; j&lt;=n-1; i--,j++)&#123;</span><br><span class="line">            if(arr[i][j]==&#x27;Q&#x27;)&#123;</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="解数独"><a href="#解数独" class="headerlink" title="解数独"></a>解数独</h2><p><a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/sudoku-solver/">37.解数独</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">class Solution &#123;</span><br><span class="line">    public void solveSudoku(char[][] board) &#123;</span><br><span class="line">        solveSudokuHelper(board);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private boolean solveSudokuHelper(char[][] board)&#123;</span><br><span class="line">        //「一个for循环遍历棋盘的行，一个for循环遍历棋盘的列，</span><br><span class="line">        // 一行一列确定下来之后，递归遍历这个位置放9个数字的可能性！」</span><br><span class="line">        for (int i = 0; i &lt; 9; i++)&#123; // 遍历行</span><br><span class="line">            for (int j = 0; j &lt; 9; j++)&#123; // 遍历列</span><br><span class="line">                if (board[i][j] != &#x27;.&#x27;)&#123; // 跳过原始数字</span><br><span class="line">                    continue;</span><br><span class="line">                &#125;</span><br><span class="line">                for (char k = &#x27;1&#x27;; k &lt;= &#x27;9&#x27;; k++)&#123; // (i, j) 这个位置放k是否合适</span><br><span class="line">                    if (isValidSudoku(i, j, k, board))&#123;</span><br><span class="line">                        board[i][j] = k;</span><br><span class="line">                        if (solveSudokuHelper(board))&#123; // 如果找到合适一组立刻返回</span><br><span class="line">                            return true;</span><br><span class="line">                        &#125;</span><br><span class="line">                        board[i][j] = &#x27;.&#x27;;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                // 9个数都试完了，都不行，那么就返回false</span><br><span class="line">                return false;</span><br><span class="line">                // 因为如果一行一列确定下来了，这里尝试了9个数都不行，说明这个棋盘找不到解决数独问题的解！</span><br><span class="line">                // 那么会直接返回， 「这也就是为什么没有终止条件也不会永远填不满棋盘而无限递归下去！」</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        // 遍历完没有返回false，说明找到了合适棋盘位置了</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 判断棋盘是否合法有如下三个维度:</span><br><span class="line">     *     同行是否重复</span><br><span class="line">     *     同列是否重复</span><br><span class="line">     *     9宫格里是否重复</span><br><span class="line">     */</span><br><span class="line">    private boolean isValidSudoku(int row, int col, char val, char[][] board)&#123;</span><br><span class="line">        // 同行是否重复</span><br><span class="line">        for (int i = 0; i &lt; 9; i++)&#123;</span><br><span class="line">            if (board[row][i] == val)&#123;</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        // 同列是否重复</span><br><span class="line">        for (int j = 0; j &lt; 9; j++)&#123;</span><br><span class="line">            if (board[j][col] == val)&#123;</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        // 9宫格里是否重复</span><br><span class="line">        int startRow = (row / 3) * 3;</span><br><span class="line">        int startCol = (col / 3) * 3;</span><br><span class="line">        for (int i = startRow; i &lt; startRow + 3; i++)&#123;</span><br><span class="line">            for (int j = startCol; j &lt; startCol + 3; j++)&#123;</span><br><span class="line">                if (board[i][j] == val)&#123;</span><br><span class="line">                    return false;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" rel="tag"># 数据结构与算法</a>
+              <a href="/tags/%E4%BB%A3%E7%A0%81/" rel="tag"># 代码</a>
+              <a href="/tags/%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/" rel="tag"># 回溯算法</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/08/29/HTTP-request-response/" rel="prev" title="HTTP&request&response">
+      <i class="fa fa-chevron-left"></i> HTTP&request&response
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/09/17/MyBatis%E5%9F%BA%E7%A1%80/" rel="next" title="MyBatis基础">
+      MyBatis基础 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95%E6%A8%A1%E6%9D%BF"><span class="nav-number">1.</span> <span class="nav-text">回溯算法模板</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E5%90%88"><span class="nav-number">2.</span> <span class="nav-text">组合</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E5%90%88%E6%80%BB%E5%92%8CIII"><span class="nav-number">3.</span> <span class="nav-text">组合总和III</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%B5%E8%AF%9D%E5%8F%B7%E7%A0%81%E7%9A%84%E5%AD%97%E6%AF%8D%E7%BB%84%E5%90%88"><span class="nav-number">4.</span> <span class="nav-text">电话号码的字母组合</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E5%90%88%E6%80%BB%E5%92%8C"><span class="nav-number">5.</span> <span class="nav-text">组合总和</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E5%90%88%E6%80%BB%E5%92%8CII"><span class="nav-number">6.</span> <span class="nav-text">组合总和II</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E5%89%B2%E5%9B%9E%E6%96%87%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="nav-number">7.</span> <span class="nav-text">分割回文字符串</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%8D%E5%8E%9FIP%E5%9C%B0%E5%9D%80"><span class="nav-number">8.</span> <span class="nav-text">复原IP地址</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%90%E9%9B%86"><span class="nav-number">9.</span> <span class="nav-text">子集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%90%E9%9B%86II"><span class="nav-number">10.</span> <span class="nav-text">子集II</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%92%E5%A2%9E%E5%AD%90%E5%BA%8F%E5%88%97"><span class="nav-number">11.</span> <span class="nav-text">递增子序列</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%A8%E6%8E%92%E5%88%97"><span class="nav-number">12.</span> <span class="nav-text">全排列</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%A8%E6%8E%92%E5%88%97-1"><span class="nav-number">13.</span> <span class="nav-text">全排列</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8D%E6%96%B0%E5%AE%89%E6%8E%92%E8%A1%8C%E7%A8%8B"><span class="nav-number">14.</span> <span class="nav-text">重新安排行程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#N%E7%9A%87%E5%90%8E"><span class="nav-number">15.</span> <span class="nav-text">N皇后</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E6%95%B0%E7%8B%AC"><span class="nav-number">16.</span> <span class="nav-text">解数独</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TheSeasonSun"
+      src="/images/avatar1.png">
+  <p class="site-author-name" itemprop="name">TheSeasonSun</p>
+  <div class="site-description" itemprop="description">We have season in the sun.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TheSeasonSun</span>
+</div>
+
+<!--  底部，强力驱动
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+-->
+
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
