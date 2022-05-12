@@ -23,13 +23,13 @@ http://example.com/
 http://example.com/tags/HTML/
 http://example.com/tags/CSS/
 http://example.com/tags/JavaWeb%E7%9B%B8%E5%85%B3/
-http://example.com/tags/JDBC/
 http://example.com/tags/HTTP/
+http://example.com/tags/JDBC/
 http://example.com/tags/JavaScript/
 http://example.com/tags/MYSQL/
-http://example.com/tags/Servlet/
 http://example.com/tags/MyBatis/
 http://example.com/tags/Java%E6%A1%86%E6%9E%B6/
+http://example.com/tags/Servlet/
 http://example.com/tags/XML/
 http://example.com/tags/Tomcat/
 http://example.com/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B8%8E%E9%AB%98%E5%B9%B6%E5%8F%91/
