@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon_32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon_16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="基本概念程序是操作系统能运行的文件 进程是运行的程序 一个程序可以有多个进程 进程：进程是操作系统进行资源分配的基本单位">
+<meta property="og:type" content="article">
+<meta property="og:title" content="线程基础">
+<meta property="og:url" content="http://example.com/2022/05/12/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/index.html">
+<meta property="og:site_name" content="TheSeasonSun">
+<meta property="og:description" content="基本概念程序是操作系统能运行的文件 进程是运行的程序 一个程序可以有多个进程 进程：进程是操作系统进行资源分配的基本单位">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2022/05/12/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/zhuangtai.png">
+<meta property="article:published_time" content="2022-05-12T01:10:11.000Z">
+<meta property="article:modified_time" content="2022-05-12T01:46:22.725Z">
+<meta property="article:author" content="TheSeasonSun">
+<meta property="article:tag" content="多线程与高并发">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/05/12/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/zhuangtai.png">
+
+<link rel="canonical" href="http://example.com/2022/05/12/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>线程基础 | TheSeasonSun</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="TheSeasonSun" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">TheSeasonSun</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="link fa-fw"></i>友链</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/05/12/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar1.png">
+      <meta itemprop="name" content="TheSeasonSun">
+      <meta itemprop="description" content="We have season in the sun.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TheSeasonSun">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          线程基础
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-05-12 09:10:11 / 修改时间：09:46:22" itemprop="dateCreated datePublished" datetime="2022-05-12T09:10:11+08:00">2022-05-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B8%8E%E9%AB%98%E5%B9%B6%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">多线程与高并发</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p><strong>程序是操作系统能运行的文件</strong></p>
+<p>进程是运行的程序</p>
+<p>一个程序可以有多个进程</p>
+<p><strong>进程：进程是操作系统进行资源分配的基本单位</strong></p>
+<span id="more"></span>
+
+<p>多进程并行处理：把程序写在不同的内存位置上来回切换</p>
+<p>多线程并行处理：一个程序内部不同任务的来回切换</p>
+<p>通俗来讲：</p>
+<ul>
+<li><p>线程：程序里不同的执行路径</p>
+</li>
+<li><p>mian方法开启的线程叫做主线程</p>
+</li>
+</ul>
+<p><strong>线程：调度执行的基本单位</strong></p>
+<ul>
+<li>一个程序执行的时候，内存会先找到它的主线程，推送给CPU执行，主线程执行时可能会开启其他线程，这时就涉及到线程之间的切换</li>
+</ul>
+<p><strong>线程切换也是需要资源的</strong></p>
+<h3 id="面试题"><a href="#面试题" class="headerlink" title="面试题"></a>面试题</h3><ol>
+<li><p>单核CPU设定多线程是否有意义？</p>
+<p>有意义</p>
+<p>CPU密集型：计算多，IO密集型：输入输出多</p>
+</li>
+<li><p>工作线程数是不是设置的越大越好</p>
+<p>不是，线程切换也需要消耗资源</p>
+</li>
+<li><p>工作线程数（线程池中线程数）设为多少最合适？</p>
+<p>N = N（CPU）+ U（CPU）* （1 + W / C）</p>
+<p>N（CPU）是处理器核的数目</p>
+<p>U（CPU）是期望的CPU利用率（0 - 1）</p>
+<p>W / C 是等待时间与计算时间的比率</p>
+</li>
+</ol>
+<h2 id="线程的创建"><a href="#线程的创建" class="headerlink" title="线程的创建"></a>线程的创建</h2><p>创建线程的5种方法</p>
+<ol>
+<li><p>new MyThread().start()  MyThread扩展了Thread类，重写run方法</p>
+</li>
+<li><p>new Thread(new r()).start()  r继承了Runnable接口，重写run方法</p>
+</li>
+<li><p>new Thread(lamda).start()  使用lamda表达式</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">new Thread(()-&gt;&#123;</span><br><span class="line">	System.out.println(&quot;Hello Lambda&quot;);</span><br><span class="line">&#125;).start()</span><br></pre></td></tr></table></figure></li>
+<li><p>ThreadPool 线程池  Executors.newCachedThrad</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ExecutorService service = Executors.newCachedThreadPool();</span><br><span class="line">service.execute(()-&gt;&#123;</span><br><span class="line">	System.out.println(&quot;Hello ThreadPool&quot;);</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></li>
+<li><p>Future Callable and FutureTask</p>
+<p>Callable  与 Runnable很类似，但继承Callable时，可以通过泛型指定返回类型，在通过线程池得到，用Future<T> 接收</T></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Future&lt;String&gt; f = service.submit(new MyCall());</span><br><span class="line">String s = f.get();</span><br></pre></td></tr></table></figure>
+
+<p>FutureTask类型</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">FutureTask&lt;String&gt; task = new FutureTask&lt;&gt;(new MyCall());</span><br><span class="line">Thread t = new Thread(task);</span><br><span class="line">s.start();</span><br><span class="line">System.out.println(task.get());</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="线程的方法"><a href="#线程的方法" class="headerlink" title="线程的方法"></a>线程的方法</h2><p>sleep():当前线程暂停一段时间。</p>
+<p>yield():退出CPU，进入等待队列（返回就绪状态）</p>
+<p>join():t2线程里使用t1.join()，t1线程加入t2线程中，等t2执行完，再执行t1。经常用来等待另一个线程结束</p>
+<h2 id="线程的状态"><a href="#线程的状态" class="headerlink" title="线程的状态*"></a>线程的状态*</h2><p><strong>小节说明：</strong></p>
+<ul>
+<li>本节重要程度：中 （帮助理解线程问题，保障知识完整性，面试很少考）  </li>
+<li>本节难度：低</li>
+</ul>
+<p>Java线程的6种状态：</p>
+<p><img src="/2022/05/12/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/zhuangtai.png" alt="zhuangtai"></p>
+<ol>
+<li>NEW：线程刚刚被创建还没有启动</li>
+<li>RANNABLE：可运行状态</li>
+<li>WAITING：等待被唤醒</li>
+<li>TIMED WAITING：隔一段时间后自动唤醒</li>
+<li>BLOCKED：被阻塞，正在等待锁</li>
+<li>TERMINATED：线程结束</li>
+</ol>
+<p>每个线程只能start一次</p>
+<p><strong>lock方法用的是JUC的CAS上锁，忙等待</strong>，不会陷入BLOCKED状态，而是WAITING</p>
+<h2 id="线程的打断"><a href="#线程的打断" class="headerlink" title="线程的打断*"></a>线程的打断*</h2><ul>
+<li>interrupt()：实例方法，设置线程的中断标志位，线程自己决定是否中断</li>
+<li>isInterrupted()：实例方法，有没有人打扰我？</li>
+<li>interrupted()：静态方法，有没有人打扰我（当前线程）？复位！</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//Thread.java  </span><br><span class="line">public void interrupt()            //t.interrupt() 打断t线程（设置t线程某给标志位f=true，并不是打断线程的运行）</span><br><span class="line">public boolean isInterrupted()     //t.isInterrupted() 查询打断标志位是否被设置（是不是曾经被打断过）</span><br><span class="line">public static boolean interrupted()//Thread.interrupted() 查看“当前”线程是否被打断，如果被打断，恢复标志位</span><br></pre></td></tr></table></figure>
+
+<p>线程使用sleep(),wait(),jion()这些方法时，会设置中断标志位，同时，也会抛出interruptedException异常，在抛出这个异常的时候，可以做某些操作，同时也会重置标志位。</p>
+<p>interrupt()不能打断正在竞争锁的线程synchronized()和lock()</p>
+<p>如果想打断正在竞争锁的线程，使用ReentrantLock的lockInterruptibly()</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * interrupt与lockInterruptibly()</span><br><span class="line"> */</span><br><span class="line">public class T11_Interrupt_and_lockInterruptibly &#123;</span><br><span class="line"></span><br><span class="line">    private static ReentrantLock lock = new ReentrantLock();</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        Thread t1 = new Thread(()-&gt; &#123;</span><br><span class="line">            lock.lock();</span><br><span class="line">            try &#123;</span><br><span class="line">                SleepHelper.sleepSeconds(10);</span><br><span class="line">            &#125; finally &#123;</span><br><span class="line">                lock.unlock();</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(&quot;t1 end!&quot;);</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        t1.start();</span><br><span class="line"></span><br><span class="line">        SleepHelper.sleepSeconds(1);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        Thread t2 = new Thread(()-&gt; &#123;</span><br><span class="line">            System.out.println(&quot;t2 start!&quot;);</span><br><span class="line">            try &#123;</span><br><span class="line">                lock.lockInterruptibly();</span><br><span class="line">            &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125; finally &#123;</span><br><span class="line">                lock.unlock();</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(&quot;t2 end!&quot;);</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        t2.start();</span><br><span class="line"></span><br><span class="line">        SleepHelper.sleepSeconds(1);</span><br><span class="line">        </span><br><span class="line">        t2.interrupt();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="线程的结束"><a href="#线程的结束" class="headerlink" title="线程的结束"></a>线程的结束</h2><p>面试题：</p>
+<p>如何优雅的结束一个线程？</p>
+<p>e.g.上传一个大文件，正在处理费时的计算，如何优雅的结束这个线程？</p>
+<p>结束线程的方法：</p>
+<ol>
+<li>自然结束（能自然结束就尽量自然结束）</li>
+<li>stop() suspend() resume()，现在已经不推荐用了，可能会导致数据的不一致</li>
+<li>volatile标志<ol>
+<li>不适合某些场景（比如还没有同步的时候，线程做了阻塞操作，没有办法循环回去）</li>
+<li>打断时间也不是特别精确，比如一个阻塞容器，容量为5的时候结束生产者，<br>但是，由于volatile同步线程标志位的时间控制不是很精确，有可能生产者还继续生产一段儿时间</li>
+</ol>
+</li>
+<li>interrupt() and isInterrupted（比较优雅）</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args)&#123;</span><br><span class="line">	Thread t = new Thread(() -&gt; &#123;</span><br><span class="line">		while(!Thread.interrupted())&#123;</span><br><span class="line">			//sleep wait</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		System.out.println(&quot;t1 end!&quot;)</span><br><span class="line">	&#125;)</span><br><span class="line">	t.start();</span><br><span class="line">	</span><br><span class="line">	SleepHelper.sleepSeconds(1);</span><br><span class="line">	</span><br><span class="line">	t.interrupt();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B8%8E%E9%AB%98%E5%B9%B6%E5%8F%91/" rel="tag"># 多线程与高并发</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/05/11/hello-world/" rel="prev" title="Hello World">
+      <i class="fa fa-chevron-left"></i> Hello World
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/05/12/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B8%89%E5%A4%A7%E7%89%B9%E6%80%A7/" rel="next" title="并发编程三大特性">
+      并发编程三大特性 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%A2%E8%AF%95%E9%A2%98"><span class="nav-number">1.1.</span> <span class="nav-text">面试题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="nav-number">2.</span> <span class="nav-text">线程的创建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">线程的方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%8A%B6%E6%80%81"><span class="nav-number">4.</span> <span class="nav-text">线程的状态*</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E7%9A%84%E6%89%93%E6%96%AD"><span class="nav-number">5.</span> <span class="nav-text">线程的打断*</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%BB%93%E6%9D%9F"><span class="nav-number">6.</span> <span class="nav-text">线程的结束</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TheSeasonSun"
+      src="/images/avatar1.png">
+  <p class="site-author-name" itemprop="name">TheSeasonSun</p>
+  <div class="site-description" itemprop="description">We have season in the sun.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TheSeasonSun</span>
+</div>
+
+<!--  底部，强力驱动
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+-->
+
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

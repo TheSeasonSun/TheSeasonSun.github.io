@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon_32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon_16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="面试题模拟银行账户，对业务写方法加锁，对业务读方法不加锁，这样行不行？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="synchronized">
+<meta property="og:url" content="http://example.com/2022/05/12/synchronized%E6%B5%85%E8%81%8A/index.html">
+<meta property="og:site_name" content="TheSeasonSun">
+<meta property="og:description" content="面试题模拟银行账户，对业务写方法加锁，对业务读方法不加锁，这样行不行？">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2022/05/12/synchronized%E6%B5%85%E8%81%8A/suo.png">
+<meta property="og:image" content="http://example.com/2022/05/12/synchronized%E6%B5%85%E8%81%8A/Hotspot%E4%B8%8B%E7%9A%84%E9%94%81%E7%8A%B6%E6%80%81.png">
+<meta property="og:image" content="http://example.com/2022/05/12/synchronized%E6%B5%85%E8%81%8A/yinzi.png">
+<meta property="article:published_time" content="2022-05-12T01:55:06.000Z">
+<meta property="article:modified_time" content="2022-05-12T02:11:09.926Z">
+<meta property="article:author" content="TheSeasonSun">
+<meta property="article:tag" content="多线程与高并发">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/05/12/synchronized%E6%B5%85%E8%81%8A/suo.png">
+
+<link rel="canonical" href="http://example.com/2022/05/12/synchronized%E6%B5%85%E8%81%8A/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>synchronized | TheSeasonSun</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="TheSeasonSun" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">TheSeasonSun</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="link fa-fw"></i>友链</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/05/12/synchronized%E6%B5%85%E8%81%8A/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar1.png">
+      <meta itemprop="name" content="TheSeasonSun">
+      <meta itemprop="description" content="We have season in the sun.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TheSeasonSun">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          synchronized
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-05-12 09:55:06 / 修改时间：10:11:09" itemprop="dateCreated datePublished" datetime="2022-05-12T09:55:06+08:00">2022-05-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B8%8E%E9%AB%98%E5%B9%B6%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">多线程与高并发</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="面试题"><a href="#面试题" class="headerlink" title="面试题"></a>面试题</h3><p>模拟银行账户，对业务写方法加锁，对业务读方法不加锁，这样行不行？</p>
+<span id="more"></span>
+<p>不行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">容易产生脏读问题（dirtyRead）</span><br><span class="line">public class Account &#123;</span><br><span class="line">	String name;</span><br><span class="line">	double balance;</span><br><span class="line">	</span><br><span class="line">	public synchronized void set(String name, double balance) &#123;</span><br><span class="line">		this.name = name;</span><br><span class="line"></span><br><span class="line">		try &#123;</span><br><span class="line">			Thread.sleep(2000);</span><br><span class="line">		&#125; catch (InterruptedException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		</span><br><span class="line">		this.balance = balance;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	public /*synchronized*/ double getBalance(String name) &#123;</span><br><span class="line">		return this.balance;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	</span><br><span class="line">	public static void main(String[] args) &#123;</span><br><span class="line">		Account a = new Account();</span><br><span class="line">		new Thread(()-&gt;a.set(&quot;zhangsan&quot;, 100.0)).start();</span><br><span class="line">		</span><br><span class="line">		try &#123;</span><br><span class="line">			TimeUnit.SECONDS.sleep(1);</span><br><span class="line">		&#125; catch (InterruptedException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		System.out.println(a.getBalance(&quot;zhangsan&quot;));</span><br><span class="line">		</span><br><span class="line">		try &#123;</span><br><span class="line">			TimeUnit.SECONDS.sleep(2);</span><br><span class="line">		&#125; catch (InterruptedException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		System.out.println(a.getBalance(&quot;zhangsan&quot;));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="synchronized注意事项"><a href="#synchronized注意事项" class="headerlink" title="synchronized注意事项"></a>synchronized注意事项</h3><p>synchronized可重入，不然可能会发生死锁（同一个线程）</p>
+<p>异常跟锁：程序之中如果出现异常，默认情况下，锁会释放</p>
+<p>synchronized锁的是对象，不是代码。synchronized(Object)</p>
+<p>synchronized不能锁String常量，Integer等基础类型</p>
+<p>在竞争不是很激烈的情况下，尽量让锁的粒度细化一些，使性能更快。如果竞争很激烈，可以锁的粒度粗化，也可提升性能。</p>
+<p>锁定某对象o，如果o的属性发生改变，不影响锁的使用，但是如果o变成另外一个对象，则锁定的对象发生改变，应该避免将锁定对象的引用变成另外的对象。（给引用加final）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">public class SyncSameObject &#123;</span><br><span class="line">   </span><br><span class="line">   /*final*/ Object o = new Object();</span><br><span class="line"></span><br><span class="line">   void m() &#123;</span><br><span class="line">      synchronized(o) &#123;</span><br><span class="line">         while(true) &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">               TimeUnit.SECONDS.sleep(1);</span><br><span class="line">            &#125; catch (InterruptedException e) &#123;</span><br><span class="line">               e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(Thread.currentThread().getName());</span><br><span class="line">            </span><br><span class="line">            </span><br><span class="line">         &#125;</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   public static void main(String[] args) &#123;</span><br><span class="line">      SyncSameObject t = new SyncSameObject();</span><br><span class="line">      //启动第一个线程</span><br><span class="line">      new Thread(t::m, &quot;t1&quot;).start();</span><br><span class="line">      </span><br><span class="line">      try &#123;</span><br><span class="line">         TimeUnit.SECONDS.sleep(3);</span><br><span class="line">      &#125; catch (InterruptedException e) &#123;</span><br><span class="line">         e.printStackTrace();</span><br><span class="line">      &#125;</span><br><span class="line">      //创建第二个线程</span><br><span class="line">      Thread t2 = new Thread(t::m, &quot;t2&quot;);</span><br><span class="line">      </span><br><span class="line">      t.o = new Object(); //锁对象发生改变，所以t2线程得以执行，如果注释掉这句话，线程2将永远得不到执行机会</span><br><span class="line">      </span><br><span class="line">      t2.start();</span><br><span class="line">      </span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="对象的内存布局"><a href="#对象的内存布局" class="headerlink" title="对象的内存布局"></a>对象的内存布局</h3><p>在虚拟机堆中new出对象，对象中首先是8个字节的markword，4个字节的类型指针，4字节成员变量（long类型8个字节），Hotspot要求对象8字节对齐（字节数是8的整数倍），不足对齐。</p>
+<p>在Hotspot中，所谓的上锁就是修改markword。</p>
+<p><img src="/2022/05/12/synchronized%E6%B5%85%E8%81%8A/suo.png" alt="suo"></p>
+<p>如上图，普通对象synchronized修饰加锁，升级为偏向锁，有线程与其竞争时偏向锁升级为轻量级锁（自旋锁，无锁 ），再竞争升级为重量级锁</p>
+<h3 id="上锁的本质"><a href="#上锁的本质" class="headerlink" title="上锁的本质"></a>上锁的本质</h3><p>锁可以升级但不能降级，意味着偏向<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E9%94%81%E5%8D%87%E7%BA%A7&spm=1001.2101.3001.7020">锁升级</a>成轻量级锁后不能降级成偏向锁。这种锁升级却不能降级的策略，目的是为了提高获得锁和释放锁的效率.</p>
+<h4 id="偏向锁"><a href="#偏向锁" class="headerlink" title="偏向锁"></a>偏向锁</h4><blockquote>
+<p> 偏向锁，顾名思义，它会偏向于第一个访问锁的线程</p>
+</blockquote>
+<ul>
+<li>如果在运行过程中，同步锁只有一个线程访问，不存在多线程争用的情况，则线程是不需要触发同步的，这种情况下，就会给线程加一个偏向锁。线程第二次到达同步代码块时，会判断此时持有锁的线程是否就是自己，如果是则正常往下执行。由于之前没有释放锁，这里也就不需要重新加锁。如果自始至终使用锁的线程只有一个，很明显偏向锁几乎没有额外开销，性能极高。</li>
+<li>如果在运行过程中，遇到了其他线程抢占锁，则持有偏向锁的线程会被挂起，JVM会消除它身上的偏向锁，将锁恢复到标准的轻量级锁。偏向锁通过消除资源无竞争情况下的同步原语，进一步提高了程序的运行性能。一旦有第二个线程加入锁竞争，偏向锁就升级为轻量级锁（自旋锁）。升级为轻量级锁的时候需要撤销偏向锁，撤销偏向锁的时候会导致STW(stop the word)操作；</li>
+</ul>
+<blockquote>
+<p>锁竞争：如果多个线程轮流获取一个锁，但是每次获取锁的时候都很顺利，没有发生阻塞，那么就不存在锁竞争。只有当某线程尝试获取锁的时候，发现该锁已经被占用，只能等待其释放，这才发生了锁竞争。</p>
+</blockquote>
+<h4 id="轻量级锁（自旋锁）"><a href="#轻量级锁（自旋锁）" class="headerlink" title="轻量级锁（自旋锁）"></a>轻量级锁（自旋锁）</h4><blockquote>
+<p>自旋锁：自旋锁原理非常简单，如果持有锁的线程能在很短时间内释放锁资源，那么那些等待竞争锁的线程就不需要做内核态和用户态之间的切换进入阻塞挂起状态，它们只需要等一等（自旋），等持有锁的线程释放锁后即可立即获取锁，这样就避免用户线程和内核的切换的消耗。</p>
+</blockquote>
+<p>在轻量级锁状态下继续锁竞争，没有抢到锁的线程将自旋，即不停地循环判断锁是否能够被成功获取。长时间的自旋操作是非常消耗资源的，一个线程持有锁，其他线程就只能在原地空耗CPU，执行不了任何有效的任务，这种现象叫做忙等（busy-waiting）。如果锁竞争情况严重，某个达到最大自旋次数的线程，会将轻量级锁升级为重量级锁。</p>
+<h4 id="重量级锁"><a href="#重量级锁" class="headerlink" title="重量级锁"></a>重量级锁</h4><p>当后续线程尝试获取锁时，发现被占用的锁是重量级锁，则直接将自己挂起，等待将来被唤醒。在JDK1.6之前，synchronized直接加重量级锁，很明显现在得到了很好的优化。</p>
+<blockquote>
+<p>重量级锁的特点：其他线程试图获取锁时，都会被阻塞，只有持有锁的线程释放锁之后才会唤醒这些线程。</p>
+</blockquote>
+<h4 id="锁的优缺点对比"><a href="#锁的优缺点对比" class="headerlink" title="锁的优缺点对比"></a>锁的优缺点对比</h4><table>
+<thead>
+<tr>
+<th>锁</th>
+<th>优点</th>
+<th>缺点</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>偏向锁</td>
+<td>加锁和解锁不需要额外的消耗，和执行非同步方法比仅存在纳秒级的差距。</td>
+<td>如果线程间存在锁竞争，会带来额外的锁撤销的消耗。</td>
+<td>适用于只有一个线程访问同步块场景。</td>
+</tr>
+<tr>
+<td>轻量级锁</td>
+<td>竞争的线程不会阻塞，提高了程序的响应速度。</td>
+<td>如果始终得不到锁竞争的线程使用自旋会消耗CPU。</td>
+<td>追求响应时间。同步块执行速度非常快。</td>
+</tr>
+<tr>
+<td>重量级锁</td>
+<td>线程竞争不使用自旋，不会消耗CPU。</td>
+<td>线程阻塞，响应时间缓慢。</td>
+<td>追求吞吐量。同步块执行速度较长。</td>
+</tr>
+</tbody></table>
+<p>摘自<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_40722827/article/details/105598682">(32条消息) 深入理解Java锁升级：无锁 → 偏向锁 → 轻量级锁 → 重量级锁_carroll18的博客-CSDN博客_无锁,偏向锁</a></p>
+<p>上锁的本质是修改线程的markword，从markword可以看出对象的锁状态，如下，先看后两位：</p>
+<p><img src="/2022/05/12/synchronized%E6%B5%85%E8%81%8A/Hotspot%E4%B8%8B%E7%9A%84%E9%94%81%E7%8A%B6%E6%80%81.png" alt="Hotspot下的锁状态"></p>
+<p>偏向锁，轻量级锁：用户空间锁（用户空间锁：不需要向操作系统申请）</p>
+<p>偏向锁：<strong>把markword线程ID改为自己线程的ID</strong></p>
+<p>StringBuffer加synchronized上的就是偏向锁，前提是没竞争条件下。</p>
+<p><strong>如果有线程竞争，偏向锁撤销，升级为自旋锁：竞争条件下的线程在线程栈内部，生成LR（LockRecord 锁记录）。自旋的方式相互竞争锁，用CAS操作将markword设置为指向自己这个线程的LR的指针，设置成功者得到锁，其它锁会CAS的一直监控此锁是否释放（自旋等待），自旋超过10次后，会自动升级为重量级锁</strong></p>
+<p>重量级锁：需要向操作系统申请锁</p>
+<blockquote>
+<p>看操作系统的interpreterRuntime.cpp文件</p>
+</blockquote>
+<p>锁重入</p>
+<p>synchronized  是可重入锁</p>
+<p>重入次数必须记录，因为要解锁几次必须对应</p>
+<p>偏向锁重入次数记录在线程栈的里LR中，每重入一次+1，</p>
+<h3 id="什么时候自旋锁升级为重量级锁？"><a href="#什么时候自旋锁升级为重量级锁？" class="headerlink" title="什么时候自旋锁升级为重量级锁？"></a>什么时候自旋锁升级为重量级锁？</h3><p>竞争加剧：有线程超过10次自旋，-XX:PreBlockSpin，或者自旋线程数超过CPU核数的一半，1.6之后，加入自适应自旋Adapative Self Spinning，JVM自己控制</p>
+<h3 id="为什么有自旋锁还需要有重量级锁？"><a href="#为什么有自旋锁还需要有重量级锁？" class="headerlink" title="为什么有自旋锁还需要有重量级锁？"></a>为什么有自旋锁还需要有重量级锁？</h3><p>自旋消耗资源，如果锁的时间长，数量多，CPU会大量消耗。</p>
+<p>重量级锁：有等待队列</p>
+<p>在自旋锁升级为重量级锁时，自旋的线程都会放到队列（waitSet），不需要消耗资源。</p>
+<h3 id="偏向锁未启动与已启动"><a href="#偏向锁未启动与已启动" class="headerlink" title="偏向锁未启动与已启动"></a>偏向锁未启动与已启动</h3><p>偏向锁是否一定比自旋锁效率高？</p>
+<p>不一定，在明确知道会有多线程竞争的情况下，偏向锁肯定会涉及锁撤销，这时候直接使用自旋锁。</p>
+<p>JVM启动时会有多线程竞争，这是默认关闭偏向锁，过一段时间再打开</p>
+<p>偏向锁启动延时</p>
+<p>对象new出来时可能偏向锁就已经启动，此情况叫匿名偏向，偏向锁没有偏向任何一个线程。</p>
+<p><del>这个图已经在文件夹里了，不贴浪费了</del></p>
+<p><img src="/2022/05/12/synchronized%E6%B5%85%E8%81%8A/yinzi.png" alt="yinzi"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B8%8E%E9%AB%98%E5%B9%B6%E5%8F%91/" rel="tag"># 多线程与高并发</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/05/12/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B8%89%E5%A4%A7%E7%89%B9%E6%80%A7/" rel="prev" title="并发编程三大特性">
+      <i class="fa fa-chevron-left"></i> 并发编程三大特性
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%A2%E8%AF%95%E9%A2%98"><span class="nav-number">1.</span> <span class="nav-text">面试题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#synchronized%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">2.</span> <span class="nav-text">synchronized注意事项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80"><span class="nav-number">3.</span> <span class="nav-text">对象的内存布局</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8A%E9%94%81%E7%9A%84%E6%9C%AC%E8%B4%A8"><span class="nav-number">4.</span> <span class="nav-text">上锁的本质</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%81%8F%E5%90%91%E9%94%81"><span class="nav-number">4.1.</span> <span class="nav-text">偏向锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BD%BB%E9%87%8F%E7%BA%A7%E9%94%81%EF%BC%88%E8%87%AA%E6%97%8B%E9%94%81%EF%BC%89"><span class="nav-number">4.2.</span> <span class="nav-text">轻量级锁（自旋锁）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E9%87%8F%E7%BA%A7%E9%94%81"><span class="nav-number">4.3.</span> <span class="nav-text">重量级锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%94%81%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9%E5%AF%B9%E6%AF%94"><span class="nav-number">4.4.</span> <span class="nav-text">锁的优缺点对比</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E8%87%AA%E6%97%8B%E9%94%81%E5%8D%87%E7%BA%A7%E4%B8%BA%E9%87%8D%E9%87%8F%E7%BA%A7%E9%94%81%EF%BC%9F"><span class="nav-number">5.</span> <span class="nav-text">什么时候自旋锁升级为重量级锁？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9C%89%E8%87%AA%E6%97%8B%E9%94%81%E8%BF%98%E9%9C%80%E8%A6%81%E6%9C%89%E9%87%8D%E9%87%8F%E7%BA%A7%E9%94%81%EF%BC%9F"><span class="nav-number">6.</span> <span class="nav-text">为什么有自旋锁还需要有重量级锁？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%81%8F%E5%90%91%E9%94%81%E6%9C%AA%E5%90%AF%E5%8A%A8%E4%B8%8E%E5%B7%B2%E5%90%AF%E5%8A%A8"><span class="nav-number">7.</span> <span class="nav-text">偏向锁未启动与已启动</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TheSeasonSun"
+      src="/images/avatar1.png">
+  <p class="site-author-name" itemprop="name">TheSeasonSun</p>
+  <div class="site-description" itemprop="description">We have season in the sun.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TheSeasonSun</span>
+</div>
+
+<!--  底部，强力驱动
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+-->
+
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

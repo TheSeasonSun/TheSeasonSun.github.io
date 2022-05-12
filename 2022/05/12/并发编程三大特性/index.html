@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon_32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon_16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="并发编程之可见性加入一个线程t1运行时使用一个变量（把这个变量从主存复制下来存到线程内部），这时线程t2修改了这个变量，但是t1线程无法读到修改后的变量值。这就是线程的不可见性。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="并发编程三大特性">
+<meta property="og:url" content="http://example.com/2022/05/12/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B8%89%E5%A4%A7%E7%89%B9%E6%80%A7/index.html">
+<meta property="og:site_name" content="TheSeasonSun">
+<meta property="og:description" content="并发编程之可见性加入一个线程t1运行时使用一个变量（把这个变量从主存复制下来存到线程内部），这时线程t2修改了这个变量，但是t1线程无法读到修改后的变量值。这就是线程的不可见性。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2022/05/12/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B8%89%E5%A4%A7%E7%89%B9%E6%80%A7/Users/Sunny/AppData/Roaming/Typora/typora-user-images/image-20220427205346934.png">
+<meta property="og:image" content="http://example.com/2022/05/12/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B8%89%E5%A4%A7%E7%89%B9%E6%80%A7/Users/Sunny/AppData/Roaming/Typora/typora-user-images/image-20220428231755226.png">
+<meta property="og:image" content="http://example.com/2022/05/12/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B8%89%E5%A4%A7%E7%89%B9%E6%80%A7/CAS.png">
+<meta property="article:published_time" content="2022-05-12T01:47:21.000Z">
+<meta property="article:modified_time" content="2022-05-12T01:53:12.926Z">
+<meta property="article:author" content="TheSeasonSun">
+<meta property="article:tag" content="多线程与高并发">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/05/12/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B8%89%E5%A4%A7%E7%89%B9%E6%80%A7/Users/Sunny/AppData/Roaming/Typora/typora-user-images/image-20220427205346934.png">
+
+<link rel="canonical" href="http://example.com/2022/05/12/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B8%89%E5%A4%A7%E7%89%B9%E6%80%A7/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>并发编程三大特性 | TheSeasonSun</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="TheSeasonSun" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">TheSeasonSun</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="link fa-fw"></i>友链</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/05/12/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B8%89%E5%A4%A7%E7%89%B9%E6%80%A7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar1.png">
+      <meta itemprop="name" content="TheSeasonSun">
+      <meta itemprop="description" content="We have season in the sun.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TheSeasonSun">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          并发编程三大特性
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-05-12 09:47:21 / 修改时间：09:53:12" itemprop="dateCreated datePublished" datetime="2022-05-12T09:47:21+08:00">2022-05-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B8%8E%E9%AB%98%E5%B9%B6%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">多线程与高并发</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="并发编程之可见性"><a href="#并发编程之可见性" class="headerlink" title="并发编程之可见性"></a>并发编程之可见性</h2><p>加入一个线程t1运行时使用一个变量（把这个变量从主存复制下来存到线程内部），这时线程t2修改了这个变量，但是t1线程无法读到修改后的变量值。这就是线程的不可见性。</p>
+<span id="more"></span>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * volatile 关键字，使一个变量在多个线程间可见</span><br><span class="line"> * A B线程都用到一个变量，java默认是A线程中保留一份copy，这样如果B线程修改了该变量，则A线程未必知道</span><br><span class="line"> * 使用volatile关键字，会让所有线程都会读到变量的修改值</span><br><span class="line"> * </span><br><span class="line"> * 在下面的代码中，running是存在于堆内存的t对象中</span><br><span class="line"> * 当线程t1开始运行的时候，会把running值从内存中读到t1线程的工作区，在运行过程中直接使用这个copy，并不会每次都去</span><br><span class="line"> * 读取堆内存，这样，当主线程修改running的值之后，t1线程感知不到，所以不会停止运行</span><br><span class="line"> * </span><br><span class="line"> * 使用volatile，将会强制所有线程都去堆内存中读取running的值</span><br><span class="line"> * </span><br><span class="line"> * volatile并不能保证多个线程共同修改running变量时所带来的不一致问题，也就是说volatile不能替代synchronized</span><br><span class="line"> *</span><br><span class="line"> * @author mashibing</span><br><span class="line"> */</span><br><span class="line">package com.mashibing.juc.c_001_00_Visibility;</span><br><span class="line"></span><br><span class="line">import com.mashibing.util.SleepHelper;</span><br><span class="line"></span><br><span class="line">public class T01_HelloVolatile &#123;</span><br><span class="line">    private static volatile boolean running = true;</span><br><span class="line"></span><br><span class="line">    private static void m() &#123;</span><br><span class="line">        System.out.println(&quot;m start&quot;);</span><br><span class="line">        while (running) &#123;</span><br><span class="line">            //System.out.println(&quot;hello&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(&quot;m end!&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line"></span><br><span class="line">        new Thread(T01_HelloVolatile::m, &quot;t1&quot;).start();</span><br><span class="line"></span><br><span class="line">        SleepHelper.sleepSeconds(1);</span><br><span class="line"></span><br><span class="line">        running = false;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>使用volatile，将会强制所有线程都去堆内存中读取running的值</strong></p>
+<p>volatile修饰的代码，字节码解释器会有一个叫lock的前置指令修饰，这个lock指令的作用就是：会等待它之前的所有指令完成，并将所有缓冲的写操作写到内存，根据缓存一致性协议，缓存的副本将会失效，并且禁止该指令与其前后的读写指令进行重排序</p>
+<p><strong>volatile并不能保证多个线程共同修改running变量时所带来的不一致问题，也就是说volatile不能替代synchronized</strong></p>
+<blockquote>
+<p>volatile</p>
+<ul>
+<li>保证线程可见性<ul>
+<li>MESI</li>
+<li>缓存一致性协议</li>
+</ul>
+</li>
+<li>禁止指令重排序<ul>
+<li>DCL单例模式双重校验加volatile</li>
+<li>loadfence原语指令（内存屏障CPU原语）</li>
+<li>storefence原语指令（内存屏障CPU原语）</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<p>在变量中加入volatile修饰可以保证线程的可见性，但变量修改时，会同步进t1线程中。另外在某些语句执行的时候（例如println，因为它源码中被synchronized修饰），会触发本地缓存与主内存之间的同步。</p>
+<p>volatile修饰引用类型（包括数组）只能保证引用本身的可见性，而不能保证内部字段的可见性。例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">private static class A&#123;</span><br><span class="line">	boolean running = true;</span><br><span class="line">	......</span><br><span class="line">&#125;</span><br><span class="line">private volatile static A a = new A();</span><br></pre></td></tr></table></figure>
+
+<p>能保证a的可见性，而running不能。</p>
+<h3 id="缓存行对齐"><a href="#缓存行对齐" class="headerlink" title="缓存行对齐"></a>缓存行对齐</h3><ul>
+<li>缓存行对齐<br>缓存行64个字节是CPU同步的基本单位，缓存行隔离会比伪共享效率要高<br>Disruptor也是类似写法</li>
+<li><strong>认识缓存行对齐的编程技巧：因为空间局部性原理，线程读内存数据时会预读它周围内存的数据，而如果多个线程需要的变量恰好相邻（t1需要x1，t2需要x2，x1，x2相邻，t1，t2会把它们都读入线程内），那么线程修改变量的时候，线程之间必须保证缓存一致性，所以会相互同步变量。这个操作也需要消耗资源，减慢效率。</strong></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">import java.util.concurrent.CountDownLatch;</span><br><span class="line"></span><br><span class="line">public class T01_CacheLinePadding &#123;</span><br><span class="line">    public static long COUNT = 10_0000_0000L;</span><br><span class="line"></span><br><span class="line">    private static class T &#123;</span><br><span class="line">        private long p1, p2, p3, p4, p5, p6, p7;</span><br><span class="line">        public long x = 0L;</span><br><span class="line">        private long p9, p10, p11, p12, p13, p14, p15;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static T[] arr = new T[2];</span><br><span class="line"></span><br><span class="line">    static &#123;</span><br><span class="line">        arr[0] = new T();</span><br><span class="line">        arr[1] = new T();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws Exception &#123;</span><br><span class="line">        CountDownLatch latch = new CountDownLatch(2);</span><br><span class="line"></span><br><span class="line">        Thread t1 = new Thread(()-&gt;&#123;</span><br><span class="line">            for (long i = 0; i &lt; COUNT; i++) &#123;</span><br><span class="line">                arr[0].x = i;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            latch.countDown();</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        Thread t2 = new Thread(()-&gt;&#123;</span><br><span class="line">            for (long i = 0; i &lt; COUNT; i++) &#123;</span><br><span class="line">                arr[1].x = i;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            latch.countDown();</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        final long start = System.nanoTime();</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">        latch.await();</span><br><span class="line">        System.out.println((System.nanoTime() - start)/100_0000);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="注：JUC"><a href="#注：JUC" class="headerlink" title="注：JUC"></a>注：JUC</h3><h4 id="tools（工具类）：又叫信号量三组工具类，包含有"><a href="#tools（工具类）：又叫信号量三组工具类，包含有" class="headerlink" title="tools（工具类）：又叫信号量三组工具类，包含有"></a>tools（工具类）：又叫信号量三组工具类，包含有</h4><p>1）CountDownLatch（闭锁） 是一个同步辅助类，在完成一组正在其他线程中执行的操作之前，它允许一个或多个线程一直等待</p>
+<p>2）CyclicBarrier（栅栏） 之所以叫barrier，是因为是一个同步辅助类，允许一组线程互相等待，直到到达某个公共屏障点 ，并且在释放等待线程后可以重用。</p>
+<p>3）Semaphore（信号量） 是一个计数信号量，它的本质是一个“共享锁“。信号量维护了一个信号量许可集。线程可以通过调用 acquire()来获取信号量的许可；当信号量中有可用的许可时，线程能获取该许可；否则线程必须等待，直到有可用的许可为止。 线程可以通过release()来释放它所持有的信号量许可。</p>
+<h4 id="executor-执行者-：是Java里面线程池的顶级接口，但它只是一个执行线程的工具，真正的线程池接口是ExecutorService，里面包含的类有："><a href="#executor-执行者-：是Java里面线程池的顶级接口，但它只是一个执行线程的工具，真正的线程池接口是ExecutorService，里面包含的类有：" class="headerlink" title="executor(执行者)：是Java里面线程池的顶级接口，但它只是一个执行线程的工具，真正的线程池接口是ExecutorService，里面包含的类有："></a>executor(执行者)：是Java里面线程池的顶级接口，但它只是一个执行线程的工具，真正的线程池接口是ExecutorService，里面包含的类有：</h4><p>1）ScheduledExecutorService 解决那些需要任务重复执行的问题</p>
+<p>2）ScheduledThreadPoolExecutor 周期性任务调度的类实现</p>
+<h4 id="atomic-原子性包-：是JDK提供的一组原子操作类，"><a href="#atomic-原子性包-：是JDK提供的一组原子操作类，" class="headerlink" title="atomic(原子性包)：是JDK提供的一组原子操作类，"></a>atomic(原子性包)：是JDK提供的一组原子操作类，</h4><p>包含有AtomicBoolean、AtomicInteger、AtomicIntegerArray等原子变量类，他们的实现原理大多是持有它们各自的对应的类型变量value，而且被volatile关键字修饰了。这样来保证每次一个线程要使用它都会拿到最新的值。</p>
+<h4 id="locks（锁包）：是JDK提供的锁机制，相比synchronized关键字来进行同步锁，功能更加强大，它为锁提供了一个框架，该框架允许更灵活地使用锁包含的实现类有："><a href="#locks（锁包）：是JDK提供的锁机制，相比synchronized关键字来进行同步锁，功能更加强大，它为锁提供了一个框架，该框架允许更灵活地使用锁包含的实现类有：" class="headerlink" title="locks（锁包）：是JDK提供的锁机制，相比synchronized关键字来进行同步锁，功能更加强大，它为锁提供了一个框架，该框架允许更灵活地使用锁包含的实现类有："></a>locks（锁包）：是JDK提供的锁机制，相比synchronized关键字来进行同步锁，功能更加强大，它为锁提供了一个框架，该框架允许更灵活地使用锁包含的实现类有：</h4><p>1）ReentrantLock 它是独占锁，是指只能被独自占领，即同一个时间点只能被一个线程锁获取到的锁。</p>
+<p>2）ReentrantReadWriteLock 它包括子类ReadLock和WriteLock。ReadLock是共享锁，而WriteLock是独占锁。</p>
+<p>3）LockSupport 它具备阻塞线程和解除阻塞线程的功能，并且不会引发死锁。</p>
+<h4 id="collections-集合类-：主要是提供线程安全的集合，-比如："><a href="#collections-集合类-：主要是提供线程安全的集合，-比如：" class="headerlink" title="collections(集合类)：主要是提供线程安全的集合， 比如："></a>collections(集合类)：主要是提供线程安全的集合， 比如：</h4><p>1）ArrayList对应的高并发类是CopyOnWriteArrayList，</p>
+<p>2）HashSet对应的高并发类是 CopyOnWriteArraySet，</p>
+<p>3）HashMap对应的高并发类是ConcurrentHashMap等等</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43888181/article/details/116546374">(31条消息) java–JUC快速入门（彻底搞懂JUC）_YANG-Π的博客-CSDN博客_java juc</a></p>
+<h3 id="Contended注解"><a href="#Contended注解" class="headerlink" title="Contended注解"></a>Contended注解</h3><p><strong>需要注意，JDK8引入了@sun.misc.Contended注解（只有1.8有），来保证缓存行隔离效果</strong><br>要使用此注解，必须去掉限制参数：-XX:-RestrictContended</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mashibing.juc.c_001_02_FalseSharing;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> sun.misc.Contended;</span><br><span class="line"><span class="comment">//注意：运行这个小程序的时候，需要加参数：-XX:-RestrictContended</span></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.CountDownLatch;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">T05_Contended</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">long</span> <span class="variable">COUNT</span> <span class="operator">=</span> <span class="number">10_0000_0000L</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">T</span> &#123;</span><br><span class="line">        <span class="meta">@Contended</span>  <span class="comment">//只有1.8起作用 , 保证x位于单独一行中</span></span><br><span class="line">        <span class="keyword">public</span> <span class="type">long</span> <span class="variable">x</span> <span class="operator">=</span> <span class="number">0L</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> T[] arr = <span class="keyword">new</span> <span class="title class_">T</span>[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        arr[<span class="number">0</span>] = <span class="keyword">new</span> <span class="title class_">T</span>();</span><br><span class="line">        arr[<span class="number">1</span>] = <span class="keyword">new</span> <span class="title class_">T</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">CountDownLatch</span> <span class="variable">latch</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CountDownLatch</span>(<span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">Thread</span> <span class="variable">t1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(()-&gt;&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">long</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; COUNT; i++) &#123;</span><br><span class="line">                arr[<span class="number">0</span>].x = i;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            latch.countDown();</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="type">Thread</span> <span class="variable">t2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(()-&gt;&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">long</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; COUNT; i++) &#123;</span><br><span class="line">                arr[<span class="number">1</span>].x = i;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            latch.countDown();</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> <span class="type">long</span> <span class="variable">start</span> <span class="operator">=</span> System.nanoTime();</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">        latch.await();</span><br><span class="line">        System.out.println((System.nanoTime() - start)/<span class="number">100_0000</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="并发编程之有序性"><a href="#并发编程之有序性" class="headerlink" title="并发编程之有序性"></a>并发编程之有序性</h2><p>为何会存在乱序：为了提高效率</p>
+<p>乱序存在的条件：</p>
+<ul>
+<li>as - if - serial     看上去像是序列化（单线程）</li>
+<li>不影响单线程的最终一致性</li>
+</ul>
+<h3 id="对象实例化的过程："><a href="#对象实例化的过程：" class="headerlink" title="对象实例化的过程："></a>对象实例化的过程：</h3><ol>
+<li>申请一个内存，成员变量赋默认值（半初始化状态）</li>
+<li>调用构造方法，成员变量赋初始值（初始化完成）</li>
+<li>与引用建立关联</li>
+</ol>
+<p><img src="/2022/05/12/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B8%89%E5%A4%A7%E7%89%B9%E6%80%A7/Users\Sunny\AppData\Roaming\Typora\typora-user-images\image-20220427205346934.png" alt="image-20220427205346934"></p>
+<p><strong>步骤2与步骤3可能会互换顺序，这个现象叫做指令重排，如果在构造方法中new线程同时启动线程，在指令重排的情况下，中间可能this可能会得到值为默认值0的变量，所以不要在构造方法中启动线程。</strong></p>
+<p>美团面试题：</p>
+<ol>
+<li>请解释一下对象的创建过程（半初始化）</li>
+<li>DCL与volatile问题（指令重排）</li>
+<li>对象在内存中的存储布局（对象与数组的存储不同）</li>
+<li>对象头具体包括什么（markword klasspointer  synchronized）</li>
+<li>对象怎么定位（直接 间接）</li>
+<li>对象怎么分配（栈上-线程本地-Eden-Old）</li>
+<li>Object o = new Object() 在内存中占用多少字节？</li>
+</ol>
+<h3 id="使用内存屏障阻止乱序执行"><a href="#使用内存屏障阻止乱序执行" class="headerlink" title="使用内存屏障阻止乱序执行"></a>使用内存屏障阻止乱序执行</h3><p>内存屏障是特殊指令：看到这种指令，前面的必须执行完，后面的才能执行</p>
+<p>intel : lfence sfence mfence(CPU特有指令)</p>
+<h3 id="JVM中的内存屏障"><a href="#JVM中的内存屏障" class="headerlink" title="JVM中的内存屏障"></a>JVM中的内存屏障</h3><p>所有实现JVM规范的虚拟机，必须实现以下四个屏障：</p>
+<p>LoadLoadBarrier LoadStoreBarrier StoreLoadBarrier StoreStorBarriere（Load：读 Store：写）</p>
+<h3 id="volatile实现原理"><a href="#volatile实现原理" class="headerlink" title="volatile实现原理"></a>volatile实现原理</h3><p>Volatile修饰的变量如下图会建立内存屏障，屏障两边的指令不可以重排！保障有序！</p>
+<p><img src="/2022/05/12/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B8%89%E5%A4%A7%E7%89%B9%E6%80%A7/Users\Sunny\AppData\Roaming\Typora\typora-user-images\image-20220428231755226.png" alt="image-20220428231755226"></p>
+<p>volatile在hotspot中的底层实现</p>
+<p>orderaccess_linux_x86.inline.hpp</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> <span class="title">OrderAccess::fence</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (os::<span class="built_in">is_MP</span>()) &#123;</span><br><span class="line">    <span class="comment">// always use locked addl since mfence is sometimes expensive</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> AMD64</span></span><br><span class="line">    <span class="function">__asm__ <span class="title">volatile</span> <span class="params">(<span class="string">&quot;lock; addl $0,0(%%rsp)&quot;</span> : : : <span class="string">&quot;cc&quot;</span>, <span class="string">&quot;memory&quot;</span>)</span></span>;</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">    <span class="function">__asm__ <span class="title">volatile</span> <span class="params">(<span class="string">&quot;lock; addl $0,0(%%esp)&quot;</span> : : : <span class="string">&quot;cc&quot;</span>, <span class="string">&quot;memory&quot;</span>)</span></span>;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>LOCK 用于在多处理器中执行指令时对共享内存的独占使用。<br>它的作用是能够将当前处理器对应缓存的内容刷新到内存，并使其他处理器对应的缓存失效。</strong><br><strong>另外还提供了有序的指令无法越过这个内存屏障的作用。</strong></p>
+</blockquote>
+<h2 id="并发编程之原子性"><a href="#并发编程之原子性" class="headerlink" title="并发编程之原子性"></a>并发编程之原子性</h2><p>race condition: 竞争条件 ， 指的是多个线程访问共享数据的时候产生竞争。</p>
+<p>在有多线程之间有竞争条件下，可能会导致数据的不一致（unconsistency)，比如多个线程操作的变量在并发访问之下产生的不期望出现的结果。</p>
+<h3 id="如何保障数据一致？"><a href="#如何保障数据一致？" class="headerlink" title="如何保障数据一致？"></a>如何保障数据一致？</h3><p>本质上是线程同步的问题（线程执行的顺序安排好），synchronized可以解决此问题。</p>
+<p>synchronized：保证原子性，可见性</p>
+<p>monitor （管程），如下代码，synchronized (o)中对象o即为monitor 。</p>
+<p>critical section （临界区），如下代码，{}内的部分为临界区。</p>
+<p>如果临界区执行时间长，语句多，叫做 锁的粒度比较粗，反之，就是锁的粒度比较细。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">synchronized (o) &#123; </span><br><span class="line">              System.out.println(Thread.currentThread().getName() + &quot; start!&quot;);</span><br><span class="line">              SleepHelper.sleepSeconds(2);</span><br><span class="line">              System.out.println(Thread.currentThread().getName() + &quot; end!&quot;);</span><br><span class="line">          &#125;</span><br></pre></td></tr></table></figure>
+
+<p>在被synchronized修饰的条件下，多线程竞争临界区的操作，必须要等持有锁的线程执行完，释放锁之后才能由下一个线程去执行。所以临界区的代码都具有原子性，synchronized也是用此方法保证可见性的。</p>
+<p>上锁的本质是吧并发编程序列化，上锁的代码这个线程执行完，另一个才能执行。</p>
+<p>锁分为两种：</p>
+<ul>
+<li><p>悲观锁：悲观的认为这个操作会被别的线程打断（悲观锁）如：synchronized</p>
+</li>
+<li><p>乐观锁：乐观的认为这个做不会被别的线程打断（乐观锁 自旋锁 无锁）如：cas操作<br>CAS = Compare And Set/Swap/Exchange</p>
+<p>乐观锁：不行就重来!</p>
+</li>
+</ul>
+<h3 id="CAS的深度剖析"><a href="#CAS的深度剖析" class="headerlink" title="CAS的深度剖析"></a>CAS的深度剖析</h3><p>CAS:Compare And Set/Exchange，比较并且设定</p>
+<p>CAS（V，Expected，NewValue）：</p>
+<p>​    if(V == E)</p>
+<p>​    V = New</p>
+<p>​    otherwise try again or fail</p>
+<p><strong>CPU原语支持CAS操作</strong></p>
+<p><img src="/2022/05/12/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B8%89%E5%A4%A7%E7%89%B9%E6%80%A7/CAS.png" alt="CAS"></p>
+<p>CAS的ABA问题解决方案 - Version</p>
+<p>因为CAS判断的过程不能被打断，所以要求CAS本身必须是原子性的</p>
+<p>操作系统底层本身也支持CAS</p>
+<h4 id="从AtomicInteger入手深入源码剖析CAS"><a href="#从AtomicInteger入手深入源码剖析CAS" class="headerlink" title="从AtomicInteger入手深入源码剖析CAS"></a>从AtomicInteger入手深入源码剖析CAS</h4><p>AtomicInteger:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="type">int</span> <span class="title function_">incrementAndGet</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">            <span class="type">int</span> <span class="variable">current</span> <span class="operator">=</span> get();</span><br><span class="line">            <span class="type">int</span> <span class="variable">next</span> <span class="operator">=</span> current + <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">if</span> (compareAndSet(current, next))</span><br><span class="line">                <span class="keyword">return</span> next;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="type">boolean</span> <span class="title function_">compareAndSet</span><span class="params">(<span class="type">int</span> expect, <span class="type">int</span> update)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> unsafe.compareAndSwapInt(<span class="built_in">this</span>, valueOffset, expect, update);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>Unsafe:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">native</span> <span class="type">boolean</span> <span class="title function_">compareAndSwapInt</span><span class="params">(Object var1, <span class="type">long</span> var2, <span class="type">int</span> var4, <span class="type">int</span> var5)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>运用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mashibing.jol;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> sun.misc.Unsafe;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">T02_TestUnsafe</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">T02_TestUnsafe</span> <span class="variable">t</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">T02_TestUnsafe</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">//Unsafe unsafe = Unsafe.getUnsafe();</span></span><br><span class="line"></span><br><span class="line">        <span class="type">Field</span> <span class="variable">unsafeField</span> <span class="operator">=</span> Unsafe.class.getDeclaredFields()[<span class="number">0</span>];</span><br><span class="line">        unsafeField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Unsafe</span> <span class="variable">unsafe</span> <span class="operator">=</span> (Unsafe) unsafeField.get(<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">Field</span> <span class="variable">f</span> <span class="operator">=</span> T02_TestUnsafe.class.getDeclaredField(<span class="string">&quot;i&quot;</span>);</span><br><span class="line">        <span class="type">long</span> <span class="variable">offset</span> <span class="operator">=</span> unsafe.objectFieldOffset(f);</span><br><span class="line">        System.out.println(offset);</span><br><span class="line"></span><br><span class="line">        <span class="type">boolean</span> <span class="variable">success</span> <span class="operator">=</span> unsafe.compareAndSwapInt(t, offset, <span class="number">0</span>, <span class="number">1</span>);</span><br><span class="line">        System.out.println(success);</span><br><span class="line">        System.out.println(t.i);</span><br><span class="line">        <span class="comment">//unsafe.compareAndSwapInt()</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>jdk8u: unsafe.cpp:</p>
+<p>cmpxchg = compare and exchange set swap</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">UNSAFE_ENTRY</span>(jboolean, <span class="built_in">Unsafe_CompareAndSwapInt</span>(JNIEnv *env, jobject unsafe, jobject obj, jlong offset, jint e, jint x))</span><br><span class="line">  <span class="built_in">UnsafeWrapper</span>(<span class="string">&quot;Unsafe_CompareAndSwapInt&quot;</span>);</span><br><span class="line">  oop p = JNIHandles::<span class="built_in">resolve</span>(obj);</span><br><span class="line">  jint* addr = (jint *) <span class="built_in">index_oop_from_field_offset_long</span>(p, offset);</span><br><span class="line">  <span class="keyword">return</span> (jint)(Atomic::<span class="built_in">cmpxchg</span>(x, addr, e)) == e;</span><br><span class="line">UNSAFE_END</span><br></pre></td></tr></table></figure>
+
+<p>jdk8u: atomic_linux_x86.inline.hpp <strong>93行</strong></p>
+<p>is_MP = Multi Processors  （CPU多核）</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">inline</span> jint     <span class="title">Atomic::cmpxchg</span>    <span class="params">(jint     exchange_value, <span class="keyword">volatile</span> jint*     dest, jint     compare_value)</span> </span>&#123;</span><br><span class="line">  <span class="type">int</span> mp = os::<span class="built_in">is_MP</span>();</span><br><span class="line">  <span class="function">__asm__ <span class="title">volatile</span> <span class="params">(LOCK_IF_MP(%<span class="number">4</span>) <span class="string">&quot;cmpxchgl %1,(%3)&quot;</span></span></span></span><br><span class="line"><span class="params"><span class="function">                    : <span class="string">&quot;=a&quot;</span> (exchange_value)</span></span></span><br><span class="line"><span class="params"><span class="function">                    : <span class="string">&quot;r&quot;</span> (exchange_value), <span class="string">&quot;a&quot;</span> (compare_value), <span class="string">&quot;r&quot;</span> (dest), <span class="string">&quot;r&quot;</span> (mp)</span></span></span><br><span class="line"><span class="params"><span class="function">                    : <span class="string">&quot;cc&quot;</span>, <span class="string">&quot;memory&quot;</span>)</span></span>;</span><br><span class="line">  <span class="keyword">return</span> exchange_value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>jdk8u: os.hpp is_MP()</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">bool</span> <span class="title">is_MP</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="comment">// During bootstrap if _processor_count is not yet initialized</span></span><br><span class="line">  <span class="comment">// we claim to be MP as that is safest. If any platform has a</span></span><br><span class="line">  <span class="comment">// stub generator that might be triggered in this phase and for</span></span><br><span class="line">  <span class="comment">// which being declared MP when in fact not, is a problem - then</span></span><br><span class="line">  <span class="comment">// the bootstrap routine for the stub generator needs to check</span></span><br><span class="line">  <span class="comment">// the processor count directly and leave the bootstrap routine</span></span><br><span class="line">  <span class="comment">// in place until called after initialization has ocurred.</span></span><br><span class="line">  <span class="keyword">return</span> (_processor_count != <span class="number">1</span>) || AssumeMP;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>jdk8u: atomic_linux_x86.inline.hpp</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> LOCK_IF_MP(mp) <span class="string">&quot;cmp $0, &quot;</span> #mp <span class="string">&quot;; je 1f; lock; 1: &quot;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>最终实现：</p>
+<p>cmpxchg = cas修改变量值</p>
+<p><strong>cmpxchg 在汇编语句上不是原子性的，所以加上了lock</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lock cmpxchg 指令</span><br></pre></td></tr></table></figure>
+
+<p>硬件：</p>
+<p>lock指令在执行的时候视情况采用缓存锁或者总线锁，如上lock cmpxchg 指令，某个CPU在改动内存的值的时候，会把总线（或其他什么东西）锁上，等CPU改动完并返回之后再解开锁。所以CAS说是乐观锁，但在底层的实现还是很像悲观锁。</p>
+<p>乐观锁效率不一定比悲观锁高，</p>
+<p>如果临界区执行时间比较长，等的线程又很多 -&gt; 重量级</p>
+<p>时间短，等的线程少 -&gt; 自旋锁</p>
+<h3 id="synchronized如何保障可见性？"><a href="#synchronized如何保障可见性？" class="headerlink" title="synchronized如何保障可见性？"></a>synchronized如何保障可见性？</h3><p>解锁之后，要把内存的状态与本地的缓存做一次刷新对比，之后下个线程才会继续</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B8%8E%E9%AB%98%E5%B9%B6%E5%8F%91/" rel="tag"># 多线程与高并发</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/05/12/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/" rel="prev" title="线程基础">
+      <i class="fa fa-chevron-left"></i> 线程基础
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/05/12/synchronized%E6%B5%85%E8%81%8A/" rel="next" title="synchronized">
+      synchronized <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%8F%AF%E8%A7%81%E6%80%A7"><span class="nav-number">1.</span> <span class="nav-text">并发编程之可见性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%93%E5%AD%98%E8%A1%8C%E5%AF%B9%E9%BD%90"><span class="nav-number">1.1.</span> <span class="nav-text">缓存行对齐</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%EF%BC%9AJUC"><span class="nav-number">1.2.</span> <span class="nav-text">注：JUC</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#tools%EF%BC%88%E5%B7%A5%E5%85%B7%E7%B1%BB%EF%BC%89%EF%BC%9A%E5%8F%88%E5%8F%AB%E4%BF%A1%E5%8F%B7%E9%87%8F%E4%B8%89%E7%BB%84%E5%B7%A5%E5%85%B7%E7%B1%BB%EF%BC%8C%E5%8C%85%E5%90%AB%E6%9C%89"><span class="nav-number">1.2.1.</span> <span class="nav-text">tools（工具类）：又叫信号量三组工具类，包含有</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#executor-%E6%89%A7%E8%A1%8C%E8%80%85-%EF%BC%9A%E6%98%AFJava%E9%87%8C%E9%9D%A2%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9A%84%E9%A1%B6%E7%BA%A7%E6%8E%A5%E5%8F%A3%EF%BC%8C%E4%BD%86%E5%AE%83%E5%8F%AA%E6%98%AF%E4%B8%80%E4%B8%AA%E6%89%A7%E8%A1%8C%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%B7%A5%E5%85%B7%EF%BC%8C%E7%9C%9F%E6%AD%A3%E7%9A%84%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%8E%A5%E5%8F%A3%E6%98%AFExecutorService%EF%BC%8C%E9%87%8C%E9%9D%A2%E5%8C%85%E5%90%AB%E7%9A%84%E7%B1%BB%E6%9C%89%EF%BC%9A"><span class="nav-number">1.2.2.</span> <span class="nav-text">executor(执行者)：是Java里面线程池的顶级接口，但它只是一个执行线程的工具，真正的线程池接口是ExecutorService，里面包含的类有：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#atomic-%E5%8E%9F%E5%AD%90%E6%80%A7%E5%8C%85-%EF%BC%9A%E6%98%AFJDK%E6%8F%90%E4%BE%9B%E7%9A%84%E4%B8%80%E7%BB%84%E5%8E%9F%E5%AD%90%E6%93%8D%E4%BD%9C%E7%B1%BB%EF%BC%8C"><span class="nav-number">1.2.3.</span> <span class="nav-text">atomic(原子性包)：是JDK提供的一组原子操作类，</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#locks%EF%BC%88%E9%94%81%E5%8C%85%EF%BC%89%EF%BC%9A%E6%98%AFJDK%E6%8F%90%E4%BE%9B%E7%9A%84%E9%94%81%E6%9C%BA%E5%88%B6%EF%BC%8C%E7%9B%B8%E6%AF%94synchronized%E5%85%B3%E9%94%AE%E5%AD%97%E6%9D%A5%E8%BF%9B%E8%A1%8C%E5%90%8C%E6%AD%A5%E9%94%81%EF%BC%8C%E5%8A%9F%E8%83%BD%E6%9B%B4%E5%8A%A0%E5%BC%BA%E5%A4%A7%EF%BC%8C%E5%AE%83%E4%B8%BA%E9%94%81%E6%8F%90%E4%BE%9B%E4%BA%86%E4%B8%80%E4%B8%AA%E6%A1%86%E6%9E%B6%EF%BC%8C%E8%AF%A5%E6%A1%86%E6%9E%B6%E5%85%81%E8%AE%B8%E6%9B%B4%E7%81%B5%E6%B4%BB%E5%9C%B0%E4%BD%BF%E7%94%A8%E9%94%81%E5%8C%85%E5%90%AB%E7%9A%84%E5%AE%9E%E7%8E%B0%E7%B1%BB%E6%9C%89%EF%BC%9A"><span class="nav-number">1.2.4.</span> <span class="nav-text">locks（锁包）：是JDK提供的锁机制，相比synchronized关键字来进行同步锁，功能更加强大，它为锁提供了一个框架，该框架允许更灵活地使用锁包含的实现类有：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#collections-%E9%9B%86%E5%90%88%E7%B1%BB-%EF%BC%9A%E4%B8%BB%E8%A6%81%E6%98%AF%E6%8F%90%E4%BE%9B%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E9%9B%86%E5%90%88%EF%BC%8C-%E6%AF%94%E5%A6%82%EF%BC%9A"><span class="nav-number">1.2.5.</span> <span class="nav-text">collections(集合类)：主要是提供线程安全的集合， 比如：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Contended%E6%B3%A8%E8%A7%A3"><span class="nav-number">1.3.</span> <span class="nav-text">Contended注解</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%9C%89%E5%BA%8F%E6%80%A7"><span class="nav-number">2.</span> <span class="nav-text">并发编程之有序性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E5%AE%9E%E4%BE%8B%E5%8C%96%E7%9A%84%E8%BF%87%E7%A8%8B%EF%BC%9A"><span class="nav-number">2.1.</span> <span class="nav-text">对象实例化的过程：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C%E9%98%BB%E6%AD%A2%E4%B9%B1%E5%BA%8F%E6%89%A7%E8%A1%8C"><span class="nav-number">2.2.</span> <span class="nav-text">使用内存屏障阻止乱序执行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM%E4%B8%AD%E7%9A%84%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C"><span class="nav-number">2.3.</span> <span class="nav-text">JVM中的内存屏障</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#volatile%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="nav-number">2.4.</span> <span class="nav-text">volatile实现原理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%8E%9F%E5%AD%90%E6%80%A7"><span class="nav-number">3.</span> <span class="nav-text">并发编程之原子性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BF%9D%E9%9A%9C%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%EF%BC%9F"><span class="nav-number">3.1.</span> <span class="nav-text">如何保障数据一致？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CAS%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90"><span class="nav-number">3.2.</span> <span class="nav-text">CAS的深度剖析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%8EAtomicInteger%E5%85%A5%E6%89%8B%E6%B7%B1%E5%85%A5%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90CAS"><span class="nav-number">3.2.1.</span> <span class="nav-text">从AtomicInteger入手深入源码剖析CAS</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#synchronized%E5%A6%82%E4%BD%95%E4%BF%9D%E9%9A%9C%E5%8F%AF%E8%A7%81%E6%80%A7%EF%BC%9F"><span class="nav-number">3.3.</span> <span class="nav-text">synchronized如何保障可见性？</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TheSeasonSun"
+      src="/images/avatar1.png">
+  <p class="site-author-name" itemprop="name">TheSeasonSun</p>
+  <div class="site-description" itemprop="description">We have season in the sun.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TheSeasonSun</span>
+</div>
+
+<!--  底部，强力驱动
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+-->
+
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
