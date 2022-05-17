@@ -26,8 +26,8 @@ http://example.com/tags/HTML/
 http://example.com/tags/CSS/
 http://example.com/tags/JavaWeb%E7%9B%B8%E5%85%B3/
 http://example.com/tags/HTTP/
-http://example.com/tags/JavaScript/
 http://example.com/tags/JDBC/
+http://example.com/tags/JavaScript/
 http://example.com/tags/MyBatis/
 http://example.com/tags/Java%E6%A1%86%E6%9E%B6/
 http://example.com/tags/MYSQL/
