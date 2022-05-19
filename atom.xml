@@ -233,9 +233,9 @@
     <category term="JavaWeb相关" scheme="http://example.com/categories/JavaWeb%E7%9B%B8%E5%85%B3/"/>
     
     
-    <category term="JavaWeb相关" scheme="http://example.com/tags/JavaWeb%E7%9B%B8%E5%85%B3/"/>
-    
     <category term="HTTP" scheme="http://example.com/tags/HTTP/"/>
+    
+    <category term="JavaWeb相关" scheme="http://example.com/tags/JavaWeb%E7%9B%B8%E5%85%B3/"/>
     
   </entry>
   
@@ -356,11 +356,11 @@
     <category term="JavaWeb相关" scheme="http://example.com/categories/JavaWeb%E7%9B%B8%E5%85%B3/"/>
     
     
+    <category term="JavaWeb相关" scheme="http://example.com/tags/JavaWeb%E7%9B%B8%E5%85%B3/"/>
+    
     <category term="HTML" scheme="http://example.com/tags/HTML/"/>
     
     <category term="CSS" scheme="http://example.com/tags/CSS/"/>
-    
-    <category term="JavaWeb相关" scheme="http://example.com/tags/JavaWeb%E7%9B%B8%E5%85%B3/"/>
     
   </entry>
   
