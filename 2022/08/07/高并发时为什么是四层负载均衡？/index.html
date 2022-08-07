@@ -1,0 +1,166 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>高并发时为什么是四层负载均衡？ | TheSeasonSun</title><meta name="keywords" content="高并发"><meta name="author" content="TheSeasonSun"><meta name="copyright" content="TheSeasonSun"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="在说明负载均衡模型之前应该先说以下前置知识：网络">
+<meta property="og:type" content="article">
+<meta property="og:title" content="高并发时为什么是四层负载均衡？">
+<meta property="og:url" content="http://example.com/2022/08/07/%E9%AB%98%E5%B9%B6%E5%8F%91%E6%97%B6%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF%E5%9B%9B%E5%B1%82%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%EF%BC%9F/index.html">
+<meta property="og:site_name" content="TheSeasonSun">
+<meta property="og:description" content="在说明负载均衡模型之前应该先说以下前置知识：网络">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/rgb(230,229,234)">
+<meta property="article:published_time" content="2022-08-07T10:45:36.000Z">
+<meta property="article:modified_time" content="2022-08-07T10:50:33.363Z">
+<meta property="article:author" content="TheSeasonSun">
+<meta property="article:tag" content="高并发">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/rgb(230,229,234)"><link rel="shortcut icon" href="/img/favicon_16.png"><link rel="canonical" href="http://example.com/2022/08/07/%E9%AB%98%E5%B9%B6%E5%8F%91%E6%97%B6%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF%E5%9B%9B%E5%B1%82%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%EF%BC%9F/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"bottom-left"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '高并发时为什么是四层负载均衡？',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2022-08-07 18:50:33'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TheSeasonSun" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatar1.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">22</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: rgb(230,229,234)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">TheSeasonSun</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">高并发时为什么是四层负载均衡？</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-08-07T10:45:36.000Z" title="发表于 2022-08-07 18:45:36">2022-08-07</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-08-07T10:50:33.363Z" title="更新于 2022-08-07 18:50:33">2022-08-07</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E9%AB%98%E5%B9%B6%E5%8F%91/">高并发</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E9%AB%98%E5%B9%B6%E5%8F%91/%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">解决方案</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="高并发时为什么是四层负载均衡？"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>在说明负载均衡模型之前应该先说以下前置知识：网络</p>
+<span id="more"></span>
+
+<p>我们都知道网络通信时网络模型，以5层模型为例，如图：</p>
+<p><img src="/2022/08/07/%E9%AB%98%E5%B9%B6%E5%8F%91%E6%97%B6%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF%E5%9B%9B%E5%B1%82%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%EF%BC%9F/image-20220807175358147.png" alt="image-20220807175358147"></p>
+<p>客户端发起通信的过程大致可以简略描述为以下步骤：</p>
+<p>客户端<strong>应用层</strong>某个进程向服务端发起通信时，所发出的信息会携带该进程的<strong>端口号</strong>（通信时端口号为某个进程的具体标识），向下传递给<strong>传输控制层</strong>的<strong>TCP</strong>协议封装成报文，TCP协议再向下传输给<strong>网络层</strong>的<strong>IP协议</strong>组成报文，之后再向下在<strong>数据链路层</strong>组成<strong>MAC</strong>报文，最后交给物理层传输向其他设备。</p>
+<p>最后的报文简单来说如下：</p>
+<p><img src="/2022/08/07/%E9%AB%98%E5%B9%B6%E5%8F%91%E6%97%B6%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF%E5%9B%9B%E5%B1%82%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%EF%BC%9F/image-20220807180857667.png" alt="image-20220807180857667"></p>
+<p>那么目标服务器的各个地址是如何得知的呢？</p>
+<p>IP地址是由DNS域名向浏览器缓存，操作系统缓存等等地方解析而来的。</p>
+<p>MAC地址是由已知的IP地址通过ARP协议广播得到的。<strong>注意MAC地址并非是目标服务器的MAC地址，而是去往目标服务器的道路上的下一个设备。</strong></p>
+<p>报文正是这样通过MAC地址传递到一个一个设备，最后到达服务器的。所以我们可以看到路由器和交换机都有数据链路层，因为报文需要在数据链路层来提取并再封装为新的MAC报文以传递到下一个设备。</p>
+<p>在高并发情况下，多个请求涌向服务器会使服务器不堪重负，效率很慢，这种情况的解决方案也很朴实：多设几个服务器，那么怎么向多个服务器分发请求就是应该关注的问题了。</p>
+<p><strong>计算机领域中的任何问题，都可以通过在两层之间增加一个中间层去解决</strong>，分发请求我们可以通过在客户端与服务器之间加一个中间层去实现。那么中间层该是怎么样的呢？</p>
+<p>在通信中，比较耗费时间的地方有两处：运输层的建立连接（三次握手）与应用层向下传输数据（操作系统用户态调用内核态）</p>
+<p>。那么我们就要避免使用到运输层与应用层，但也不是单纯的路由器，我们还是希望中间层可以有运输层将各个请求分发给各个服务器，但中间件本身不建立连接。所以我们可以得到如下模型：</p>
+<p><img src="/2022/08/07/%E9%AB%98%E5%B9%B6%E5%8F%91%E6%97%B6%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF%E5%9B%9B%E5%B1%82%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%EF%BC%9F/image-20220807183616344.png" alt="image-20220807183616344"></p>
+<p>而这就是<strong>“四层负载均衡”</strong></p>
+<p>在此基础上，有衍生出D-NAT模型（替换报文的IP地址），RD模型（只替换请求报文的MAC地址，服务器响应报文直接传回客户端），TUN隧道模型（创建一个新的报文携带客户端发来的请求报文，发向服务器）</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="http://example.com">TheSeasonSun</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2022/08/07/%E9%AB%98%E5%B9%B6%E5%8F%91%E6%97%B6%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF%E5%9B%9B%E5%B1%82%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%EF%BC%9F/">http://example.com/2022/08/07/%E9%AB%98%E5%B9%B6%E5%8F%91%E6%97%B6%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF%E5%9B%9B%E5%B1%82%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%EF%BC%9F/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">TheSeasonSun</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/">高并发</a></div><div class="post_share"><div class="social-share" data-image="/rgb(230,229,234)" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/gh/overtrue/share.js@master/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2022/05/29/MySQL%E8%B0%83%E4%BC%98%E4%B9%8B%E7%B4%A2%E5%BC%95%E5%8C%B9%E9%85%8D%E6%96%B9%E5%BC%8F%E4%B8%8E%E4%BC%98%E5%8C%96%E7%BB%86%E8%8A%82/"><img class="next-cover" src="/rgb(230,229,234)" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">MySQL调优之索引匹配方式与优化细节</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatar1.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">TheSeasonSun</div><div class="author-info__description">We have season in the sun.</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">22</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/TheSeasonSun"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="sticky_layout"></div></div></main><footer id="footer" style="background: rgb(230,229,234)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By TheSeasonSun</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
