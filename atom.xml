@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2023-02-24T07:00:29.288Z</updated>
+  <updated>2023-03-17T03:09:36.377Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -21,9 +21,9 @@
     <link href="http://example.com/2023/02/24/%E7%8F%8D%E7%88%B1%E7%94%9F%E5%91%BD%EF%BC%8C%E8%BF%9C%E7%A6%BB%E5%BA%A6%E7%9B%98/"/>
     <id>http://example.com/2023/02/24/%E7%8F%8D%E7%88%B1%E7%94%9F%E5%91%BD%EF%BC%8C%E8%BF%9C%E7%A6%BB%E5%BA%A6%E7%9B%98/</id>
     <published>2023-02-24T03:04:04.000Z</published>
-    <updated>2023-02-24T07:00:29.288Z</updated>
+    <updated>2023-03-17T03:09:36.377Z</updated>
     
-    <content type="html"><![CDATA[<p>事情的起因是这样的，有群友想要一部文字游戏的资源（魔法使之夜，全年龄，TYPEMOON代表作），而我恰好有，就通过私聊分享给了他。具体过程如下：</p><span id="more"></span><blockquote><p>魔法使之夜我先从小号网盘里的游戏(游戏1）分享给主网盘，保存后主网盘(游戏2）又复制了一份该游戏(游戏3，同样保存在主网盘），之后将复制出来的游戏(游戏3）又私信分享给网友，同时我自己又在电脑上开始下载该游戏(游戏2），但下载到一半暂停下载了，等到第二天时，再下载发现 游戏1 2 3 全都无法下载且无法分享。</p></blockquote><p>群友举报资源的可能性很低，所以被封禁的最可能的原因是云盘官方在下载过程中查看了资源内容，然后封禁。</p><p>意识到这一点我痛定思痛，为了避免将来这种情况再次发生，我决定逐步弃用百度网盘。</p><p>而为了寻找尽可能安全的替代品，我将目光投向了OneDrive。</p><h2 id="OneDrive扩容"><a href="#OneDrive扩容" class="headerlink" title="OneDrive扩容"></a>OneDrive扩容</h2><p>OneDrive个人免费容量只有5G，为了获得更多的容量，我加入了Microsoft 365 开发者计划，在这个计划中，参与人OneDrive最低可获得1T容量（空间的可以自行设置的，最高5T），最初的订阅时间只有90天，如何参与人比较活跃，使用Microsoft 365账号比较积极，则可以免费续订。</p><h2 id="OneDrive加速"><a href="#OneDrive加速" class="headerlink" title="OneDrive加速"></a>OneDrive加速</h2><p>解决容量问题后，我又发现OneDrive在下载云上资源的速度很不理想，速度竟然只有200KB/S左右。但是OneDrive本身是不限速的（再次点名度盘），那么速度慢只是单纯因为网络环境。</p><p>在加入开发者计划时，我将服务器地点选择在了新加坡（没有内地的选项，新加坡以及是最近的数据中心了），国外的服务器网络速度当然是不如国内的，再加上官方下载路径的网络挤兑就导致下载速度极其慢。</p><p>所以要加快速度，要点在于如何绕开官方下载路径。</p><p>解决方案：</p><ol><li><p>本地部署Alist挂载OneDrive，通过AList获取文件下载链接。</p></li><li><p>利用IDM多线程下载。</p></li></ol><p>借此终于将速度从200K/S提升到了500-1000K/S，速度依旧不是很理想，可能是因为本地部署的（<strong>依旧是通过官方链接下载，只是绕过了官网并且用IDM提升速度</strong>），如果部署在国内服务器上，应该会非常快。</p><p>有其他的方案来进一步改进，暂时停留在设想阶段，之后会验证。</p><ol><li>Alist下载配置使用服务器域名代理。</li><li>Alist下载配置CF Worker域名代理。</li><li>科学上网开全局模式。</li><li>IDM下载使用代理模式。</li></ol>]]></content>
+    <content type="html"><![CDATA[<p>事情的起因是这样的，有群友想要一部文字游戏的资源（魔法使之夜，全年龄，TYPEMOON代表作），而我恰好有，就通过私聊分享给了他。具体过程如下：</p><span id="more"></span><blockquote><p>魔法使之夜我先从小号网盘里的游戏(游戏1）分享给主网盘，保存后主网盘(游戏2）又复制了一份该游戏(游戏3，同样保存在主网盘），之后将复制出来的游戏(游戏3）又私信分享给网友，同时我自己又在电脑上开始下载该游戏(游戏2），但下载到一半暂停下载了，等到第二天时，再下载发现 游戏1 2 3 全都无法下载且无法分享。</p></blockquote><p>群友举报资源的可能性很低，所以被封禁的最可能的原因是云盘官方在下载过程中查看了资源内容，然后封禁。</p><p>意识到这一点我痛定思痛，为了避免将来这种情况再次发生，我决定逐步弃用百度网盘。</p><p>而为了寻找尽可能安全的替代品，我将目光投向了OneDrive。</p><h2 id="OneDrive扩容"><a href="#OneDrive扩容" class="headerlink" title="OneDrive扩容"></a>OneDrive扩容</h2><p>OneDrive个人免费容量只有5G，为了获得更多的容量，我加入了Microsoft 365 开发者计划，在这个计划中，参与人OneDrive最低可获得1T容量（空间的可以自行设置的，最高5T），最初的订阅时间只有90天，如何参与人比较活跃，使用Microsoft 365账号比较积极，则可以免费续订。</p><h2 id="OneDrive加速"><a href="#OneDrive加速" class="headerlink" title="OneDrive加速"></a>OneDrive加速</h2><p>解决容量问题后，我又发现OneDrive在下载云上资源的速度很不理想，速度竟然只有200KB/S左右。但是OneDrive本身是不限速的（再次点名度盘），那么速度慢只是单纯因为网络环境。</p><p>在加入开发者计划时，我将服务器地点选择在了新加坡（没有内地的选项，新加坡以及是最近的数据中心了），国外的服务器网络速度当然是不如国内的，再加上官方下载路径的网络挤兑就导致下载速度极其慢。</p><p>所以要加快速度，要点在于如何绕开官方下载路径。</p><p>解决方案：</p><ol><li><p>本地部署Alist挂载OneDrive，通过AList获取文件下载链接。</p></li><li><p>利用IDM多线程下载。</p></li></ol><p>借此终于将速度从200K/S提升到了500-1000K/S，速度依旧不是很理想，可能是因为本地部署的（<strong>依旧是通过官方链接下载，只是绕过了官网并且用IDM提升速度</strong>），如果部署在国内服务器上，应该会非常快。</p><p>有其他的方案来进一步改进，暂时停留在设想阶段，之后会验证。</p><ol><li>Alist下载配置使用服务器域名代理。</li><li>Alist下载配置CF Worker域名代理。</li><li>科学上网开全局模式。<ul><li>已验证，速度很慢，本人使用魔法的节点是过洛杉矶的，而OneDrive服务器在新加坡，可能是因为距离太远所以没有什么效果。另外使用魔法的节点也很垃圾可能也是原因。</li></ul></li><li>IDM下载使用代理模式。</li></ol><p>2023年3月17日十点半左右，未使用魔法，下载速度最快达到40多M，平均在20-40M之间。</p><p><img src="/2023/02/24/%E7%8F%8D%E7%88%B1%E7%94%9F%E5%91%BD%EF%BC%8C%E8%BF%9C%E7%A6%BB%E5%BA%A6%E7%9B%98/image-20230317.jpg" alt="img"></p><p>很疑惑，最近家里换WIFI了，但影响下载速度的因素太多，无从判断是什么影响了网速。</p>]]></content>
     
     
     <summary type="html">&lt;p&gt;事情的起因是这样的，有群友想要一部文字游戏的资源（魔法使之夜，全年龄，TYPEMOON代表作），而我恰好有，就通过私聊分享给了他。具体过程如下：&lt;/p&gt;</summary>
@@ -294,11 +294,11 @@
     <category term="数据结构与算法" scheme="http://example.com/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/"/>
     
     
-    <category term="哈希表" scheme="http://example.com/tags/%E5%93%88%E5%B8%8C%E8%A1%A8/"/>
-    
     <category term="数据结构与算法" scheme="http://example.com/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/"/>
     
     <category term="代码" scheme="http://example.com/tags/%E4%BB%A3%E7%A0%81/"/>
+    
+    <category term="哈希表" scheme="http://example.com/tags/%E5%93%88%E5%B8%8C%E8%A1%A8/"/>
     
   </entry>
   
@@ -390,11 +390,11 @@
     <category term="数据结构与算法" scheme="http://example.com/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/"/>
     
     
+    <category term="二叉树" scheme="http://example.com/tags/%E4%BA%8C%E5%8F%89%E6%A0%91/"/>
+    
     <category term="数据结构与算法" scheme="http://example.com/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/"/>
     
     <category term="代码" scheme="http://example.com/tags/%E4%BB%A3%E7%A0%81/"/>
-    
-    <category term="二叉树" scheme="http://example.com/tags/%E4%BA%8C%E5%8F%89%E6%A0%91/"/>
     
   </entry>
   
